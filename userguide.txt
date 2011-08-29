@@ -1,0 +1,5 @@
+The application is completely GUI driven.  There are two important Menus in the Menu bar.
+Main Menu: This menu contains functions to search for caterers, to clear the display, and to exit the application.
+Admin Manu: This menu lets you connect or disconnect to remote server or a local database file.
+
+To book a caterer: First, search for a caterer, or display all caterers using Main Menu. Then double click on any row to book that caterer. When you double click, you will get an Input box in which you can enter the customerid.

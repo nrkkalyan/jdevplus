@@ -1,0 +1,244 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+
+
+  
+  
+  <meta content="text/html;charset=ISO-8859-1" http-equiv="Content-Type">
+
+
+  
+  
+  
+  <title>Enthuware JDevPlus Sample Project - Instructions to use</title>
+  <meta content="Enthuware" name="author">
+</head>
+
+
+<body>
+<div style="text-align: center;"><span style="font-weight: bold;">Enthuware JDevPlus Sample Application</span><br>
+</div>
+<br>
+This is a sample application that poses similar situation and
+challenges as the real SCJD assignment. Please remember that this is a
+SAMPLE application and is not a solution for your real assignment
+although you can learn how various issues can be dealt with.
+<br>
+
+
+<br>
+
+
+
+The details of the application and the requirements are described in docs\instructionsUC.html
+
+
+
+
+<br>
+
+
+
+<br>
+
+
+
+<big><span style="font-weight: bold;">How to execute the program</span></big><br>
+
+
+
+The entry point into the application is through the class <span style="font-weight: bold;">com.unitedcaterers.ApplicationMain</span>. <br>
+
+
+<br>
+
+
+
+You can either run this class after extracting the contents of runme.jar or as discribed below:
+
+<br>
+
+
+
+<ol>
+
+
+
+  <li>Let's say you have extracted the contents of the jar file to <span style="font-weight: bold;">c:\jdevplus\</span>. You should see the following files in this folder:
+    <br>
+
+
+
+    
+    
+    
+    <ol>
+
+
+
+      <li>javadoc : Contains the generated JavaDoc files.</li>
+
+
+
+      <li>src &nbsp;: Contains the source code of the project.</li>
+
+
+
+      <li>readme.html &nbsp;: This file.</li>
+
+
+
+      <li>ucdb.db : The database file.</li>
+
+
+
+      <li>userguide.txt : &nbsp;Help on how to use the application.</li>
+
+
+
+      <li>applicationdesign.html : Important information about the architecture and design of this application.</li>
+
+
+
+      <li>instructionsuc.html : The instruction file based on which
+this project was developed. This is similar to the file that you might
+have received as a part of your SCJD assignement.</li>
+
+
+
+      <li>version.txt : Contains the version information of the Java compiler and platform used.</li>
+
+
+
+      <li>runme.jar : Contains the class files with appropriate manifest information.</li>
+      <li>jdevplus-netbeans : This folder contains netbeans project files. Please see details below.</li>
+
+
+
+    
+    
+    
+    </ol>
+
+
+
+    <br>
+
+
+
+  </li>
+
+
+
+  <li>Run the server. Open up a DOS (command/shell) prompt and go to the above mentioned directory. Execute the following:<br>
+
+
+
+    <br>
+
+
+
+    <span style="font-weight: bold;">c:\jdevplus\&gt;java -jar runme.jar rmiserver</span>
+OR
+    <span style="font-weight: bold;">c:\</span><span style="font-weight: bold;">jdevplus</span><span style="font-weight: bold;">\&gt;java -jar runme.jar socketserver</span>
+    <br>
+
+
+
+    <br>
+
+
+
+(The server starts RMI registry itself on port 1099, so you don't have
+to start it.)
+It will popup a dialog asking for the properties such as database file.
+Default values will be populated and will work without any change.&nbsp;<br>
+
+
+
+  </li>
+
+
+
+  <li>Run the client.
+Open up a new DOS (command/shell) window and go to same directory. Now execute:
+    <br>
+
+
+
+    <br>
+
+
+
+    <span style="font-weight: bold;">c:\</span><span style="font-weight: bold;">jdevplus</span><span style="font-weight: bold;">\&gt;java -jar runme.jar rmiclient</span> or
+    <span style="font-weight: bold;">c:\</span><span style="font-weight: bold;">jdevplus</span><span style="font-weight: bold;">\&gt;java -jar runme.jar socketclient</span>&nbsp;<br>
+
+
+
+    <br>
+
+
+
+It will popup a dialog asking for the properties such as hostname and
+port. Default values will be populated and will work without any
+change.
+    <br>
+
+
+
+    <br>
+
+
+
+The client can also be run in local mode. In this mode, the Database
+server and the Client run in the same JVM without any networking logic.
+You can run it using the following command line:<br>
+
+
+
+    <br>
+
+
+
+    <span style="font-weight: bold;">
+
+c:\</span><span style="font-weight: bold;">jdevplus</span><span style="font-weight: bold;">\&gt;java -jar runme.jar alone</span>
+
+    <br>
+
+
+
+    <br>
+
+
+
+It will popup a dialog asking for the properties such as database file.
+Default values will be populated and will work without any change.</li>
+
+
+
+</ol>
+<br>
+<hr style="width: 100%; height: 2px;"><span style="font-weight: bold;">Netbeans Project</span><br>
+<br>
+The folder <span style="font-weight: bold;">jdevplus-netbeans</span>
+contains files specific to NetBeans. It has nothing to do with the the
+assignment. To use it, open Netbeans IDE, click on File-&gt; Open
+Project menu, and browse to this folder. Netbeans will recognize this
+as a valid project and open it. Use "clean and build" to build the
+project.<br>
+<span style="font-weight: bold;">Note : </span>The project files assume
+that your root folder (the folder where you have extracted the contents
+of rmisocket.zip) to c:\jdevplus folder.<br>
+<br>
+<span style="font-weight: bold;">Eclipse Project</span><br>
+The directory structure of the source code is compatible with Ecplise.
+&nbsp;Just do New -&gt;Java Project and select "Create Project from
+Existing Source", to open the project in Eclipse.<br>
+<span style="font-weight: bold;"></span><br>
+<hr style="width: 100%; height: 2px;">There is extensive documentation within the code itself. So please do
+check it out and in case of any doubt, do not hesitate to contact us at
+<span style="font-weight: bold;">support@enthuware.com</span>
+</body>
+</html>

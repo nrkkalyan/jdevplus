@@ -1,0 +1,3 @@
+java version "1.6.0_13"
+
+Platform: Windows Vista Home Basic

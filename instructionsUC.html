@@ -1,0 +1,497 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+
+  <title>Sample Assignment (United Caterers) for SCJD</title>
+</head>
+
+<body>
+
+<h1>
+<a name="top">Sample Assignment (United Caterers) for SCJD</a></h1>
+
+<h2>
+Introduction and Index</h2>
+
+This document specifies the requirements of the application.
+<p>The application distribution is composed of:
+</p>
+<ul>
+
+  <li>
+This document</li>
+
+  <li>
+A non-relational database file</li>
+
+</ul>
+
+<p>This document is divided into the following sections:
+</p>
+<ul>
+
+  <li>
+    <b><a href="#what_this">Application Overview</a></b> - A general description
+of the application you will write</li>
+
+  <li>
+    <b><a href="#arch">Architecture</a></b> - The parts of the application
+and how they fit together</li>
+
+  <li>
+    <b><a href="#UI">User Interface</a></b> - GUI specification</li>
+
+  <li>
+    <b><a href="#database">Server</a></b> -&nbsp; The data server and its network
+connection</li>
+
+  <li>
+    <b><a href="#data">Data file format</a></b> The format and schema of the database file</li>
+
+  <li>
+    <b><a href="#Deliverables">Deliverables</a></b> - The components you must
+deliver, and how you should package them.</li>
+
+</ul>
+
+<hr>
+<h2>
+<a name="what_this"></a>Application Overview</h2>
+
+<h3>Background</h3>
+
+United Caterers (UC) is a consortium of caterers of New York.
+They take requests from customers for catering to Engagement, Wedding, Funeral, and
+other such parties and offer a range of caterers operating in the vicinity.
+Customers call United Caterers and tell them about their requirement in terms
+of number of people in the party and location. The customer service rep (CSR) at UC,
+will use this application to see all the caterers meeting the given criteria and then book one caterer.
+
+<p>You are given a non-relational data file that contains some data in the format
+described below. UC already has a some custom back end applications that manipulate the
+data file so you need to work with the same datafile and thus you need to write the code
+that can manipulate the data file.
+
+</p>
+<p>The new application, using the existing data file format, must allow a CSR to generate
+a list of caterers that match a the customer's criteria.
+
+</p>
+<h3>
+Things to do</h3>
+
+The following are the high level features that must be implemented:
+<ul>
+
+  <li>
+A client program with a graphical user interface that connects to the database</li>
+
+  <li>
+A data access system that provides record locking and a flexible search
+mechanism</li>
+
+  <li>
+Network server functionality for the database system</li>
+
+</ul>
+
+The work involves a number of design choices that have to be made. In all
+such cases, the following principles should be applied.
+<h4>
+Clarity and Maintainability</h4>
+
+<dl>
+
+  <dd>
+A clear design, such as will be readily understood by junior programmers,
+will be preferred to a complex one, even if the complex one is a little
+more efficient. Code complexity, including nesting depth, argument passing,
+and the number of classes and interfaces, should be reasonable.</dd>
+
+  <dd>
+  </dd>
+
+</dl>
+
+<h4>
+Documentation</h4>
+
+<dl>
+
+  <dd>
+    <ul>
+
+      <li>Use javadoc for each element of the public interface of each class.
+      </li>
+      <li>Create a full suite of documentation for the classes of the completed project.
+This must be generated using the tool "javadoc" and must be in HTML format. Provide
+javadoc documentation for all classes you write.
+      </li>
+      <li>You must also provide basic user documentation. This should be sufficient to
+allow a user who is familiar with the broad purpose of the project to use
+the application. This documentation must be in <b>one</b> of these three formats:
+        <ul>
+
+          <li>
+HTML</li>
+
+          <li>
+Plain text (not a wordprocessor format)</li>
+
+          <li>
+Within the application as a help system.</li>
+
+        </ul>
+
+      </li>
+    </ul>
+
+  </dd>
+</dl>
+
+<h4>
+Correctness</h4>
+
+<dt>
+Your project must conform to this specification.&nbsp; Features that deviate
+from specification will not receive full credit.&nbsp; You will not receive
+extra credit points for work beyond the requirements of the specification.</dt>
+
+<h4>
+Use of Standard Elements</h4>
+
+<dl>
+Use of functionality provided by the core Java classes will be preferred
+to your own implementation of that functionality, unless there is a specific
+advantage to providing your own implementation.
+</dl>
+
+<i><a href="#top">Return to top</a></i>
+<hr>
+<h2>
+<a name="arch"></a>Overall Architecture</h2>
+
+<h3>
+Major Components</h3>
+
+The main architecture of the application must be a traditional client-server
+system. There are three key parts:&nbsp; the server-side data management
+system, the client-side GUI, and the network connection between the two.
+<h3>
+Non-Networked Mode</h3>
+
+The program must be able to work in a non-networked mode. In this mode,
+the database and GUI must run in the same VM and must perform no networking,
+must not use loopback networking, and must not involve the serialization
+of any objects when communicating between the GUI and database elements.
+<p>The operating mode is selected using the single command line argument
+that is permitted. Architecturally, this mode must use the database and
+GUI from the networked form, but must not use the network server code at
+all.
+</p>
+<h3>
+Network Communication Approach</h3>
+
+You have a choice regarding the network connection protocol. You must use
+either serialized objects over a simple socket connection, or RMI.&nbsp;
+Both options are equally acceptable.&nbsp; Keep in mind that networking
+must be entirely bypassed in the non-networked mode.
+<h3>
+Restrictions on RMI</h3>
+
+<li>
+&nbsp;You must not require the use of an HTTP server.</li>
+
+<li>
+&nbsp;You must not require the installation of a security manager.</li>
+
+<li>
+&nbsp;You must provide all classes pre-installed so that no dynamic class
+downloading occurs.</li>
+
+<li>
+&nbsp;You must use RMI over JRMP (do not use IIOP)</li>
+
+<p><i><a href="#top">Return to top</a></i>
+</p>
+<hr>
+<h2>
+<a name="UI"></a>The User Interface</h2>
+
+The user interface for this assignment must satisfy the following criteria:
+<ul>
+
+  <li>
+It must be composed exclusively with components from the Java Foundation
+Classes (Swing components).</li>
+
+  <li>
+It must allow the user to search the data for all records, or for records
+where the number of guests and/or location fields exactly match values specified by
+the user.</li>
+
+  <li>
+It must present search results in a JTable.</li>
+
+  <li>
+It must allow the user to book a selected record, updating the database
+file accordingly.</li>
+
+</ul>
+
+Your user interface should be designed with the expectation of future functionality
+enhancements, and it should establish a framework that will support this
+with minimal disruption to the users when this occurs.
+<p><i><a href="#top">Return to top</a></i>
+</p>
+<hr>
+<h2>
+<a name="database"></a>Server</h2>
+
+<h3>Required Interface</h3>
+
+Your data access class must be called "DataLayer.java", must be in a package
+called "com.unitedcateres.db", and must implement the following interface:
+<p></p>
+<pre>package com.unitedcateres.db;<br>public interface DataBase<br>{<br>// Reads a record from the file.<br>// Returns an array where each element is a record value.<br>public String[] read(int recNo) throws RecordNotFoundException;<br><br>// Modifies the fields of a record. The new value for field n<br>// appears in data[n]. Throws SecurityException if the record<br>// is locked with a key other than lockkey.<br>public void update(int recNo, String[] data, String lockkey)<br>	throws RecordNotFoundException, SecurityException;<br><br>// Deletes a record, making the record number and associated<br>// data slot (row) available for reuse.<br>// Throws SecurityException if the record is locked with a key<br>// other than lockkey.<br>public void delete(int recNo, String lockkey)<br>	throws RecordNotFoundException, SecurityException;<br><br>// Returns an array of record numbers that match the specified<br>// criteria. Field n in the database file is described by<br>// criteria[n]. A null value in criteria[n] matches any field<br>// value. A non-null  value in criteria[n] matches any field<br>// value that begins with criteria[n]. (For example, "Queen"<br>// matches "Queen" or "Queens".)<br>public int[] find(String[] criteria);<br><br>// Creates a new record in the database (possibly reusing a<br>// deleted entry). Inserts the given data, and returns the record<br>// number of the new record.<br>public int create(String[] data) throws DuplicateKeyException;<br><br>// Locks a record so that it can only be updated or deleted by this client.<br>// Returned value is a string (lockkey) that must be used when the record is unlocked,<br>// updated, or deleted. If the specified record is already locked by a different<br>// client, the current thread gives up the CPU and consumes no CPU cycles until<br>// the record is unlocked.<br>public String lock(int recNo) throws RecordNotFoundException;<br><br>// Releases the lock on a record. lockkey must be the key<br>// that was returned when the record was locked; otherwise it throws SecurityException.<br>public void unlock(int recNo, String lockkey)<br>	throws RecordNotFoundException, SecurityException;<br><br><span style="font-weight: bold;">//The following methods do not use lockkey (aka lock cookie) </span><br style="font-weight: bold;"><span style="font-weight: bold;">//as given in some assignments given by sun but are otherwise same as above</span><br><br>public <span style="font-weight: bold;">void</span> lockWithoutcookie(int recNo) throws RecordNotFoundException;<br><br>public void unlockWithoutcookie(int recNo)<br>	throws RecordNotFoundException, SecurityException;<br><br>public void updateWithoutcookie(int recNo, String[] data)<br>	throws RecordNotFoundException, SecurityException;<br><br>public void deleteWithoutcookie(int recNo)<br>	throws RecordNotFoundException, SecurityException;<br><br>}<br></pre>
+
+<p><i><a href="#top">Return to top</a></i>
+</p>
+<hr>
+<h2> <a name="data"></a> Data file Format</h2>
+
+The format of data in the database file is as follows:
+<p>
+</p>
+<ol>
+
+  <li>The file starts with a 4 byte string that stores the data type id.
+This id identifies this file as a data file for this application.
+  </li>
+  <li>An int stored in 4 bytes, that tells you the offset to the start of
+record zero.
+  </li>
+  <li>A short stored in 2 bytes that tells you the number of fields in each record.
+  </li>
+</ol>
+
+After the header information as specified above, the file stores the field descriptions.
+For each field, it stores the following information:
+<ol>
+
+  <li>A short stored in 2 bytes that tells you the length in bytes of field name.
+  </li>
+  <li>Next n bytes (as defined by the previous entry) specify the field name.
+  </li>
+  <li>A short stored in 2 bytes that tells you the length of the  field in bytes.
+  </li>
+</ol>
+
+<p>After all the "meta" information above, Data section starts. Note that this
+section starts from the offset that is specified in the header.
+Each row of data is stored as per the schema described above. However, each
+row is prepended with a 1 byte flag that specifies the status of the record.
+0x00 implies valid record, 0xF0 implies deleted record.
+</p>
+<p>All numeric values stored in the header information use the formats
+of the DataInputStream and DataOutputStream classes. All text values, and
+all fields (which are text only), contain only 8 bit characters, null terminated
+if less than the maximum length for the field. The character encoding is
+8 bit US ASCII.
+</p>
+<h3>Database schema Used by United Caterers</h3>
+
+The database files used by this application contains the following fields:
+<table border="1">
+
+  <tbody>
+    <tr>
+
+      <th>Field No.</th>
+
+      <th>Field name in the database</th>
+
+      <th>Field length</th>
+
+      <th>Detailed description</th>
+
+    </tr>
+
+    <tr>
+
+      <td>1</td>
+
+      <td>name</td>
+
+      <td>32</td>
+
+      <td>The name of the caterer.</td>
+
+    </tr>
+
+    <tr>
+
+      <td>2</td>
+
+      <td>location</td>
+
+      <td>64</td>
+
+      <td>The locality in which this caterer works</td>
+
+    </tr>
+
+    <tr>
+
+      <td>3</td>
+
+      <td>experties</td>
+
+      <td>128</td>
+
+      <td>Comma separated list of types of parties (eg. wedding, funeral, bachealor etc.)
+this caterer services.</td>
+
+    </tr>
+
+    <tr>
+
+      <td>4</td>
+
+      <td>size</td>
+
+      <td>2</td>
+
+      <td>The number of people this caterer can service at a time.</td>
+
+    </tr>
+
+    <tr>
+
+      <td>5</td>
+
+      <td>price</td>
+
+      <td>4</td>
+
+      <td>Price per person for the party in USD.</td>
+
+    </tr>
+
+    <tr>
+
+      <td>6</td>
+
+      <td>customerid</td>
+
+      <td>8</td>
+
+      <td>The customerid (an 8 lettered string) that identifies the customer who has
+booked this caterer. An empty value means that this caterer has not been booked.
+You should assume that the customer services reps know the customer ids and will use these
+ids to while locking the records. Since the db file is also used by other custom applications,
+this id is important to them but means nothing more than a regular field to this application.
+      </td>
+
+    </tr>
+
+  </tbody>
+</table>
+
+<hr>
+<p><i><a href="#top">Return to top</a></i>
+<a name="Deliverables"></a>Deliverables
+</p>
+<h3>
+Target Platform and Execution</h3>
+
+Throughout this exercise, you must use exclusively the Java 2 platform.
+You may develop your code using any implementation of the Java 2 platform,
+but the submission that you return must have been tested and shown to work
+under a production (not development) version of the Sun Microsystems' Java
+2 platform and that platform must not have been superseded by a new production
+version for more than 18 months by the time you make your submission.
+<p>You are permitted to use any IDE tool you choose, but you must not submit
+any code that is not your own work. The final program must have no dependencies
+on any libraries other than those of the Java 2 Platform.
+</p>
+<p>When you submit your assignment, each part (client and server) must
+be executable using a command of this exact form:
+</p>
+<blockquote><tt>java -jar &lt;path_and_filename&gt; [&lt;mode&gt;]</tt></blockquote>
+
+Your programs must not require use of command line arguments other than
+the single mode flag, which must be supported.&nbsp; Your programs must
+not require use of command line property specifications. All configuration
+must be done via a GUI, and must be persistent between runs of the program.
+Such configuration information must be stored in a file called suncertify.properties
+which must be located in the current working directory.
+<p>The mode flag must be either "server", indicating the server program
+must run, "alone", indicating standalone mode, or left out entirely, in
+which case the network client and gui must run.
+</p>
+<p>You must not require manual editing of any files by the examiners.
+</p>
+<h3>
+Packaging of Submissions</h3>
+
+All elements of your submission must be packaged in a single JAR file.
+The JAR file must have the following layout and contents in its root:
+<ul>
+
+  <li>
+The executable JAR containing the programs. This must be called <tt>runme.jar</tt>.</li>
+
+  <li>
+The original, <i>unchanged</i> database file that was supplied to you.
+  </li>
+
+  <li>
+A directory called <tt>code</tt>, containing all the source code and related
+parts of your project. You must create subdirectories within this to reflect
+your package structure and distribute your source files within those directories.</li>
+
+  <li>
+A file called <tt>version.txt.</tt> This must contain pure ASCII (not a
+word processor format) indicating the exact version of JDK you used, and
+the host platform you worked on.</li>
+
+  <li>
+A directory called <tt>docs</tt>, containing the following items at the
+top level:</li>
+
+  <ul>
+
+    <li>
+This html file.</li>
+
+    <li>
+A subdirectory called javadoc, containing HTML/Javadoc documentation for
+all classes and interfaces you are submitting.</li>
+
+    <li>
+A file called <tt>choices.txt</tt> that containing pure ASCII (not a word
+processor format) text describing the significant design choices you made.
+Detail the problems you perceived, the issues surrounding them, your value
+judgments, and the decisions that you made. This document should also describe
+any uncertainties you had regarding the project, and the decisions you
+made when resolving them.</li>
+
+    <li>
+User documentation for the database server and the gui client. If your
+user documentation is online then you may omit this file. However, if the
+documentation is not online, you must provide either a single plain ASCII
+(not word processor format) text document, which must be called <tt>userguide.txt</tt>,
+or multiple HTML files which must all be accessible from a starting point
+document that must be called <tt>userguide.html</tt>.</li>
+
+  </ul>
+
+</ul>
+
+<p><i><a href="#top">Return to top</a></i>
+</p>
+<hr>
+
+</body>
+</html>
