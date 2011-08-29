@@ -5,7 +5,7 @@ import com.unitedcaterers.server.RMIServerMain;
 /**
  * This class is the entry point to the application. It determines what - the
  * client or the server, needs to be run and then starts up the required
- * component.
+ * component. CS
  * 
  * @autdhor Enthuware
  * @version 1.0
