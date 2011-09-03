@@ -52,7 +52,7 @@ public class UCServerImpl implements UCServer {
 		if (db == null) {
 			throw new UCException("Connection to the database has been closed. Must restart/recreate the server.");
 		}
-		String[] criteria = new String[] { null, null, null, "" + maxGuests, null, null };
+		String[] criteria = new String[] { null, null, null, "" + maxGuests, null, null, null };
 		return findAndReturnData(criteria);
 	}
 	
@@ -62,7 +62,7 @@ public class UCServerImpl implements UCServer {
 			throw new UCException("Connection to the database has been closed. Must restart/recreate the server.");
 		}
 		
-		String[] criteria = new String[] { null, location, null, null, null, null };
+		String[] criteria = new String[] { null, location, null, null, null, null, null };
 		return findAndReturnData(criteria);
 		
 	}
@@ -73,7 +73,7 @@ public class UCServerImpl implements UCServer {
 		if (db == null) {
 			throw new UCException("Connection to the database has been closed. Must restart/recreate the server.");
 		}
-		String[] criteria = new String[] { null, location, null, "" + maxGuests, null, null };
+		String[] criteria = new String[] { null, location, null, "" + maxGuests, null, null, null };
 		return findAndReturnData(criteria);
 		
 	}
@@ -83,7 +83,7 @@ public class UCServerImpl implements UCServer {
 		if (db == null) {
 			throw new UCException("Connection to the database has been closed. Must restart/recreate the server.");
 		}
-		String[] criteria = new String[] { null, null, null, null, null, null };
+		String[] criteria = new String[] { null, null, null, null, null, null, null };
 		return findAndReturnData(criteria);
 	}
 	

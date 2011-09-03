@@ -20,7 +20,6 @@ import java.util.logging.Logger;
 public class DataBaseImpl implements DataBase {
 	
 	private static Logger					logger	= Logger.getLogger("DataBaseImpl");
-	private final String					dbfilename, magiccode;
 	private final int						offset;
 	private final int						nooffields;
 	private final String[]					fieldnames;
@@ -47,21 +46,20 @@ public class DataBaseImpl implements DataBase {
 	 *             reading/writing the db file or if the given magiccode does
 	 *             not match with the magiccode stored in the dbfile.
 	 */
-	public DataBaseImpl(String dbfilename, String magiccode) throws IOException {
-		this.dbfilename = dbfilename;
-		this.magiccode = magiccode;
+	public DataBaseImpl(String dbfilename, String magiccode2) throws IOException {
 		FileInputStream fis = new FileInputStream(dbfilename);
 		DataInputStream dis = new DataInputStream(fis);
 		
 		byte[] ba = new byte[4];
 		int nob = dis.read(ba);
 		String str = new String(ba);
-		boolean valid = str.equals(magiccode);
-		logger.fine("Magiccode in file : " + str + " Magiccode given : " + magiccode
-				+ (valid ? "DB File is valid" : "Mismatch in magiccode"));
-		if (!valid) {
-			throw new IOException("Invalid DBFile. Magiccode mismatch.");
-		}
+		// boolean valid = str.equals(magiccode);
+		// logger.fine("Magiccode in file : " + str + " Magiccode given : " +
+		// magiccode
+		// + (valid ? "DB File is valid" : "Mismatch in magiccode"));
+		// if (!valid) {
+		// throw new IOException("Invalid DBFile. Magiccode mismatch.");
+		// }
 		
 		offset = dis.readInt();
 		
@@ -82,7 +80,7 @@ public class DataBaseImpl implements DataBase {
 			fieldnames[i] = str;
 			fieldmap.put(str, new Short(fl));
 		}
-		recordlength = recordlength + 2;// 2 bytes for deleted flag.
+		// recordlength = recordlength + 2;// 2 bytes for deleted flag.
 		dis.close();
 		fis.close();
 		

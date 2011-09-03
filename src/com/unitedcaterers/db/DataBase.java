@@ -8,8 +8,8 @@ package com.unitedcaterers.db;
  * and unlock methods. <br>
  * <br>
  * In "UrlyBird" assignment, the lock method does not return any key/lock cookie
- * and the update, delete, and unlock methods do not take lockkey argument. Yet,
- * the assignment includes the requirement that only the client that locked
+ * and the update, delete, and unlock methods do not take lockCookie argument.
+ * Yet, the assignment includes the requirement that only the client that locked
  * record should be able to unlock it. There are three ways to solve this issue
  * -
  * <ol>
@@ -21,8 +21,8 @@ package com.unitedcaterers.db;
  * ideally, the locking should be taken care of by the business service exposed
  * by the server. The client should not be locking and unlocking the db rows
  * explicilty. If at all this is required, then the signature of the lock and
- * unlock method should be changed to include lockkey (lock cookie) so that the
- * service may still remain stateless.
+ * unlock method should be changed to include lockCookie (lock cookie) so that
+ * the service may still remain stateless.
  * <li>Ignore the requirement that the row can only be unlocked by the same
  * client. Explain in choices.txt that since the interface methods do not
  * support a lock key mechanism, this functionality will depend on identifying a
@@ -67,16 +67,16 @@ public interface DataBase {
 	/**
 	 * Modifies the fields of a record. The new value for field n appears in
 	 * data[n]. Throws SecurityException if the record is locked with a key
-	 * other than lockkey.
+	 * other than lockCookie.
 	 * 
 	 * @param recNo
 	 *            The record to be updated.
 	 * @param data
 	 *            The values that need to be stored.
-	 * @param lockkey
+	 * @param lockCookie
 	 *            The key using which the record was locked.
 	 */
-	public void update(int recNo, String[] data, long lockkey) throws RecordNotFoundException, SecurityException;
+	public void update(int recNo, String[] data, long lockCookie) throws RecordNotFoundException, SecurityException;
 	
 	/**
 	 * Deletes a record, making the record number and associated data slot (row)
@@ -84,12 +84,12 @@ public interface DataBase {
 	 * 
 	 * @param recNo
 	 *            The record that needs to be deleted.
-	 * @param lockkey
+	 * @param lockCookie
 	 *            The key using which the record was locked.
 	 * @throws SecurityException
-	 *             If the record is locked with a key other than lockkey.
+	 *             If the record is locked with a key other than lockCookie.
 	 */
-	public void delete(int recNo, long lockkey) throws RecordNotFoundException, SecurityException;
+	public void delete(int recNo, long lockCookie) throws RecordNotFoundException, SecurityException;
 	
 	/**
 	 * Returns an array of record numbers that match the specified criteria.
@@ -116,10 +116,10 @@ public interface DataBase {
 	
 	/**
 	 * Locks a record so that it can only be updated or deleted by this client.
-	 * Returned value is a string (lockkey) that must be used when the record is
-	 * unlocked, updated, or deleted. If the specified record is already locked
-	 * by a different client, the current thread gives up the CPU and consumes
-	 * no CPU cycles until the record is unlocked.
+	 * Returned value is a string (lockCookie) that must be used when the record
+	 * is unlocked, updated, or deleted. If the specified record is already
+	 * locked by a different client, the current thread gives up the CPU and
+	 * consumes no CPU cycles until the record is unlocked.
 	 * 
 	 * @param recNo
 	 *            The record to be locked.
@@ -129,13 +129,14 @@ public interface DataBase {
 	public long lock(int recNo) throws RecordNotFoundException;
 	
 	/**
-	 * Releases the lock on a record. lockkey must be the key that was returned
-	 * when the record was locked; otherwise it throws SecurityException.
+	 * Releases the lock on a record. lockCookie must be the key that was
+	 * returned when the record was locked; otherwise it throws
+	 * SecurityException.
 	 * 
 	 * @param recNo
 	 *            The record to be unlocked.
-	 * @param lockkey
+	 * @param lockCookie
 	 *            The key that was used to lock the record.
 	 */
-	public void unlock(int recNo, long lockkey) throws RecordNotFoundException, SecurityException;
+	public void unlock(int recNo, long lockCookie) throws RecordNotFoundException, SecurityException;
 }
