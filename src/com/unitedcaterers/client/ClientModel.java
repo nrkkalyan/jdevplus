@@ -32,8 +32,8 @@ public class ClientModel extends java.util.Observable {
 	 */
 	public ClientModel() {
 		super();
-		this.columns = new String[] { "name", "location", "smoking", "date", "size", "rate", "owner" };
-		this.columnWidths = new int[] { 2, 10, 10, 15, 2, 3, 5 };
+		this.columns = new String[] { "Sr No", "Name", "Location", "Size", "Smoking", "Rate", "Date", "Owner" };
+		this.columnWidths = new int[] { 2, 15, 15, 1, 1, 8, 10, 10 };
 		setChanged(); // calling setChanged() signifies that the data in the
 						// model has changed.
 	}

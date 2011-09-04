@@ -6,7 +6,10 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,17 +22,38 @@ import java.util.logging.Logger;
  */
 public class DataBaseImpl implements DataBase {
 	
-	private static Logger					logger	= Logger.getLogger("DataBaseImpl");
-	private final int						offset;
-	private final int						nooffields;
+	private static Logger					logger					= Logger.getLogger("DataBaseImpl");
+	private int								offset;
 	private final String[]					fieldnames;
 	private final HashMap<String, Short>	fieldmap;
 	private int								recordlength;
 	private final RandomAccessFile			ras;
+	private static final String				CHARSET					= "US-ASCII";
+	/** The bytes that store the "magic cookie" value */
+	private static final int				MAGIC_COOKIE_BYTES		= 4;
+	
+	/** The bytes that store the total overall length of each record */
+	private static final int				RECORD_LENGTH_BYTES		= 4;
+	
+	/** The bytes that store the number of fields in each record */
+	private static final int				NUMBER_OF_FIELDS_BYTES	= 2;
+	
+	/** The bytes that store the length of each field name */
+	private static final int				FIELD_NAME_BYTES		= 2;
+	
+	/** The bytes that store the fields length */
+	private static final int				FIELD_LENGTH_BYTES		= 2;
+	
+	/** The bytes that store the flag of each record */
+	private static final int				RECORD_FLAG_BYTES		= 1;
+	
+	/** The value that identifies a record as being valid */
+	private static final int				VALID					= 0;
+	
 	/**
 	 * This hashmap holds the lock information for records.
 	 */
-	private final LockManager				locker	= new LockManager();
+	private final LockManager				locker					= new LockManager();
 	
 	/**
 	 * This is the only constructor. It validates the magiccode at the begining
@@ -50,37 +74,27 @@ public class DataBaseImpl implements DataBase {
 		FileInputStream fis = new FileInputStream(dbfilename);
 		DataInputStream dis = new DataInputStream(fis);
 		
-		byte[] ba = new byte[4];
-		int nob = dis.read(ba);
-		String str = new String(ba);
-		// boolean valid = str.equals(magiccode);
-		// logger.fine("Magiccode in file : " + str + " Magiccode given : " +
-		// magiccode
-		// + (valid ? "DB File is valid" : "Mismatch in magiccode"));
-		// if (!valid) {
-		// throw new IOException("Invalid DBFile. Magiccode mismatch.");
-		// }
-		
-		offset = dis.readInt();
-		
-		nooffields = dis.readShort();
+		int magicCookie = dis.readInt();
+		offset += MAGIC_COOKIE_BYTES + RECORD_LENGTH_BYTES + NUMBER_OF_FIELDS_BYTES;
+		recordlength = dis.readInt();
+		int nooffields = dis.readShort();
 		fieldnames = new String[nooffields];
 		logger.fine("No of fields : " + nooffields);
 		
 		fieldmap = new HashMap<String, Short>();
-		recordlength = 0;
+		
 		for (int i = 0; i < nooffields; i++) {
-			short fnl = dis.readShort();
-			ba = new byte[fnl];
-			nob = dis.read(ba);
-			str = new String(ba);
+			final int nameLength = dis.readShort();
+			offset += FIELD_NAME_BYTES + FIELD_LENGTH_BYTES + nameLength;
+			final byte[] fieldNameByteArray = new byte[nameLength];
+			dis.read(fieldNameByteArray);
+			fieldnames[i] = new String(fieldNameByteArray, CHARSET);
 			short fl = dis.readShort();
-			recordlength = recordlength + fl;
-			logger.fine("Field Name : " + str + " Field Length : " + fl);
-			fieldnames[i] = str;
-			fieldmap.put(str, new Short(fl));
+			fieldmap.put(fieldnames[i], new Short(fl));
+			
 		}
-		// recordlength = recordlength + 2;// 2 bytes for deleted flag.
+		
+		recordlength = recordlength + 1;// 2 bytes for deleted flag.
 		dis.close();
 		fis.close();
 		
@@ -92,8 +106,7 @@ public class DataBaseImpl implements DataBase {
 		
 	}
 	
-	private static byte	DELETEDROW_BYTE1	= (byte) 'D';
-	private static byte	DELETEDROW_BYTE2	= (byte) 'D';
+	private static byte	DELETEDROW_BYTE1	= (byte) '1';
 	
 	/**
 	 * Reads a record from the file.
@@ -117,10 +130,10 @@ public class DataBaseImpl implements DataBase {
 			}
 			
 			// String rec = new String(ba);
-			if (ba[0] == DELETEDROW_BYTE1 && ba[1] == DELETEDROW_BYTE2) {
+			if (ba[0] == DELETEDROW_BYTE1) {
 				throw new RecordNotFoundException("This record has been deleted : " + recNo);
 			}
-			return parseRecord(new String(ba));
+			return parseRecord(new String(ba, CHARSET));
 		} catch (IOException e) {
 			throw new RecordNotFoundException("Unable to retrieve the record : " + recNo + " : " + e.getMessage());
 		}
@@ -135,13 +148,75 @@ public class DataBaseImpl implements DataBase {
 	 */
 	private String[] parseRecord(String recorddata) {
 		String[] returnValue = new String[fieldnames.length];
-		int startind = 2;// first 2 bytes are for delete flag so ignore them.
+		int startind = 1;// first 1 bytes are for delete flag so ignore them.
 		for (int i = 0; i < fieldnames.length; i++) {
 			int fieldlength = (fieldmap.get(fieldnames[i])).intValue();
 			returnValue[i] = recorddata.substring(startind, startind + fieldlength).trim();
 			startind = startind + fieldlength;
 		}
 		return returnValue;
+	}
+	
+	private synchronized Room roomInstanceFromByteArray(final byte[] array, int recordNumber) throws IOException {
+		if (array == null) {
+			throw new IllegalArgumentException("Invalid parameter length");
+		}
+		
+		class RecordFieldReader {
+			
+			private int	offset1	= 1;
+			
+			private String read(int length) throws UnsupportedEncodingException {
+				String str = new String(array, offset1, length, CHARSET);
+				offset1 += length;
+				return str.trim();
+			}
+		}
+		RecordFieldReader readRecord = new RecordFieldReader();
+		Room room = new Room();
+		room.setRecordNumber(recordNumber);
+		room.setValid(true);
+		room.setName(readRecord.read(DBConstants.HOTEL_NAME_LENGTH));
+		room.setLocation(readRecord.read(DBConstants.CITY_LENGTH));
+		room.setSize(readRecord.read(DBConstants.SIZE_LENGTH));
+		room.setSmoking(readRecord.read(DBConstants.SMOKING_LENGTH));
+		room.setRate(readRecord.read(DBConstants.RATE_LENGTH));
+		room.setDate(dateStringToDate(readRecord.read(DBConstants.DATE_LENGTH)));
+		room.setCustomerId(readRecord.read(DBConstants.CUSTOMER_ID_LENGTH));
+		
+		return room;
+		
+	}
+	
+	private boolean validityFlagToboolean(byte flag) {
+		return DBConstants.VALID_RECORD_FLAG == flag;
+	}
+	
+	public Date dateStringToDate(String date) {
+		if (date != null) {
+			try {
+				synchronized (DBConstants.DATEFORMAT) {
+					return DBConstants.DATEFORMAT.parse(date);
+				}
+			} catch (ParseException e) {
+				throw new IllegalArgumentException(e);
+			}
+		}
+		return null;
+	}
+	
+	public static Boolean smokingFlagToBoolean(String flag) {
+		if (DBConstants.SMOKING_FLAG_YES.equals(flag)) {
+			return Boolean.TRUE;
+		} else {
+			return Boolean.FALSE;
+		}
+	}
+	
+	private synchronized String readNBytes(byte[] input, int length) throws IOException {
+		String str = new String(input, offset, length, CHARSET);
+		offset += length;
+		return str.trim();
 	}
 	
 	/**
@@ -180,8 +255,7 @@ public class DataBaseImpl implements DataBase {
 				if (noofbytesread < recordlength) {
 					throw new RecordNotFoundException("No such record : " + recNo);
 				}
-				String rec = new String(ba);
-				if (ba[0] == DELETEDROW_BYTE1 && ba[1] == DELETEDROW_BYTE2) {
+				if (ba[0] == DELETEDROW_BYTE1) {
 					throw new RecordNotFoundException("This record has been deleted : " + recNo);
 				}
 				ras.seek(offset + recNo * recordlength);
@@ -263,12 +337,11 @@ public class DataBaseImpl implements DataBase {
 					throw new RecordNotFoundException("No such record : " + recNo);
 				}
 				
-				if (ba[0] == DELETEDROW_BYTE1 && ba[1] == DELETEDROW_BYTE2) {
+				if (ba[0] == DELETEDROW_BYTE1) {
 					throw new RecordNotFoundException("This record has already been deleted : " + recNo);
 				}
 				ras.seek(offset + recNo * recordlength);
 				ras.writeByte(DELETEDROW_BYTE1);
-				ras.writeByte(DELETEDROW_BYTE2);
 				
 			} catch (IOException e) {
 				throw new SecurityException("Unable to delete the record : " + recNo + " : " + e.getMessage());
@@ -292,14 +365,16 @@ public class DataBaseImpl implements DataBase {
 			}
 			ras.seek(offset);
 			byte[] ba = new byte[recordlength];
-			int noofbytesread = 0;
 			int recno = 0;
-			while ((noofbytesread = ras.read(ba)) == recordlength) {
-				String rec = new String(ba);
-				if (ba[0] == DELETEDROW_BYTE1 && ba[1] == DELETEDROW_BYTE2) {
+			
+			while (ras.read(ba) == recordlength) {
+				String rec = new String(ba, CHARSET);
+				if (ba[0] == DELETEDROW_BYTE1) {
 					recno++;
 					continue;
 				}
+				Room room = roomInstanceFromByteArray(ba, recno);
+				System.out.println(room);
 				String[] fielddata = parseRecord(rec);
 				boolean match = true;
 				for (int i = 0; i < fieldnames.length; i++) {
@@ -374,7 +449,7 @@ public class DataBaseImpl implements DataBase {
 			int noofbytesread = 0;
 			while ((noofbytesread = ras.read(ba)) == recordlength) {
 				
-				if (ba[0] == DELETEDROW_BYTE1 && ba[1] == DELETEDROW_BYTE2) {
+				if (ba[0] == DELETEDROW_BYTE1) {
 					return retval;
 				}
 				
