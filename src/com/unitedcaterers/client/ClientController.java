@@ -299,6 +299,7 @@ public class ClientController implements ActionListener {
 			data = mainModel.getDisplayRows()[ind];
 		}
 		
+		// KALYAN: Change to Booking Dialog
 		String customerid = JOptionPane.showInputDialog(appFrame, "Please enter the customerid :", "Book Caterer",
 				JOptionPane.INFORMATION_MESSAGE);
 		if (customerid != null) {
@@ -306,6 +307,7 @@ public class ClientController implements ActionListener {
 			// example, you can check if it contains any spaces or junk
 			// characters
 			try {
+				
 				boolean status = currentServer.bookCaterer(customerid, data);
 				if (status) {
 					// JOptionPane.showMessageDialog(appFrame, "Thank you, " +
