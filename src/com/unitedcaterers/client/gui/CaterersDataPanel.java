@@ -2,9 +2,6 @@ package com.unitedcaterers.client.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.Observable;
 
 import javax.swing.JFrame;
@@ -89,42 +86,14 @@ public class CaterersDataPanel extends BasePanel {
 		}
 	}
 	
-	private class TableMouseListener extends MouseAdapter {
-		
-		@Override
-		public void mousePressed(MouseEvent me) {
-		}
-		
-		@Override
-		public void mouseClicked(MouseEvent e) {
-			int cc = e.getClickCount();
-			if (cc > 1) {
-				CaterersDataPanel.this.doDoubleClick(e);
-			}
-		}
-	}
-	
 	public CaterersDataPanel() {
 		super();
 		
 		cdModel = new CDModel();
 		
 		recordJTable = new JTable(cdModel);
-		recordJTable.addMouseListener(new TableMouseListener());
 		
 		initGUI();
-	}
-	
-	public void actionPerformed(ActionEvent ae) {
-		postUserActionEvent(ae);
-	}
-	
-	private void doDoubleClick(MouseEvent me) {
-		int ind = recordJTable.rowAtPoint(me.getPoint());
-		if (mainModel != null) {
-			ActionEvent ae = new ActionEvent(this, me.getID(), "BOOK_CATERER:" + ind);
-			postUserActionEvent(ae);
-		}
 	}
 	
 	private void initGUI() {

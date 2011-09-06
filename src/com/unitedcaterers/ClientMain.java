@@ -24,10 +24,10 @@ public class ClientMain {
 	public static void startup(String clienttype) {
 		ClientFrame cf = new ClientFrame();
 		ClientController cc = new ClientController(cf, clienttype);
-		cf.setSize(700, 400);
+		cf.setSize(700, 700);
 		cf.setLocationRelativeTo(null); // makes sure that the frame is centered
-										// on the screen.
 		cf.setVisible(true);
+		cc.doViewAllCaterers();
 	}
 	
 }

@@ -62,19 +62,6 @@ public class ControlPanel extends BasePanel implements ActionListener {
 		mb.add(mMenu);
 		this.add(BorderLayout.NORTH, mb);
 		
-		// JPanel tempPanel = new JPanel();
-		// tempPanel.setLayout(new FlowLayout()); // new BoxLayout(tempPanel,
-		// BoxLayout.X_AXIS));
-		// tempPanel.add(new
-		// JLabel("Hotel Name : "));
-		// tempPanel.add(hotelnameTF);
-		// tempPanel.add(new JLabel("Location : "));
-		// tempPanel.add(locationTF);
-		// tempPanel.add(searchBT);
-		// tempPanel.add(bookBT);
-		
-		// tempPanel.add(addSearchAndBookPanel(), BorderLayout.SOUTH);
-		
 		this.add(BorderLayout.SOUTH, addSearchAndBookPanel());
 	}
 	

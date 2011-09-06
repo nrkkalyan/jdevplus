@@ -48,11 +48,11 @@ public class UCServerImpl implements UCServer {
 	}
 	
 	@Override
-	public String[][] searchCaterersByMaxGuests(int maxGuests) throws RemoteException, UCException {
+	public String[][] searchCaterersByHotelName(String hotelName) throws RemoteException, UCException {
 		if (db == null) {
 			throw new UCException("Connection to the database has been closed. Must restart/recreate the server.");
 		}
-		String[] criteria = new String[] { null, null, null, "" + maxGuests, null, null, null };
+		String[] criteria = new String[] { hotelName, null, null, null, null, null, null };
 		return findAndReturnData(criteria);
 	}
 	
@@ -68,12 +68,12 @@ public class UCServerImpl implements UCServer {
 	}
 	
 	@Override
-	public String[][] searchCaterersByMaxGuestsAndLocation(int maxGuests, String location) throws RemoteException,
+	public String[][] searchCaterersByHotelNameAndLocation(String hotelName, String location) throws RemoteException,
 			UCException {
 		if (db == null) {
 			throw new UCException("Connection to the database has been closed. Must restart/recreate the server.");
 		}
-		String[] criteria = new String[] { null, location, null, "" + maxGuests, null, null, null };
+		String[] criteria = new String[] { hotelName, location, null, null, null, null, null };
 		return findAndReturnData(criteria);
 		
 	}

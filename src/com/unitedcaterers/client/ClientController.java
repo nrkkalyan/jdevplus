@@ -47,7 +47,7 @@ public class ClientController implements ActionListener {
 	 * The current search parameters. It is used to refresh the table.
 	 */
 	private String							currentQuery	= "";
-	private int								currentGuests;
+	private String							currentHotelName;
 	private String							currentLocation;
 	/**
 	 * Denotes whether the current server is a local (in process) server or not.
@@ -244,9 +244,9 @@ public class ClientController implements ActionListener {
 		} else if (action.startsWith("SEARCH_CATERERS_WITH_PARAMS")) {
 			int i1 = action.indexOf(":");
 			int i2 = action.indexOf(",");
-			int cap = -1;
+			String cap = null;
 			if (i2 > i1 + 1) {
-				cap = Integer.parseInt(action.substring(i1 + 1, i2));
+				cap = action.substring(i1 + 1, i2);
 			}
 			String loc = null;
 			if (action.length() > i2 + 1) {
@@ -311,7 +311,7 @@ public class ClientController implements ActionListener {
 					// JOptionPane.showMessageDialog(appFrame, "Thank you, " +
 					// data[1] + " has been booked.",
 					// "Book Caterer", JOptionPane.INFORMATION_MESSAGE);
-					refreshView(currentQuery, currentGuests, currentLocation);
+					refreshView(currentQuery, currentHotelName, currentLocation);
 				} else {
 					JOptionPane.showMessageDialog(appFrame, "Sorry, Unable to book this caterer.", "Book Caterer",
 							JOptionPane.INFORMATION_MESSAGE);
@@ -367,11 +367,11 @@ public class ClientController implements ActionListener {
 		Object obj = JOptionPane.showInputDialog(appFrame,
 				"How many number of guests do you want to cater to?(Click Cancel if no preference)", "Max Guests",
 				JOptionPane.INFORMATION_MESSAGE, null, null, "50");
-		int maxguests = -1;
+		String hotelName = null;
 		if (obj != null) {
 			try {
-				maxguests = Integer.parseInt(obj.toString().trim());
-				currentGuests = maxguests;
+				hotelName = obj.toString().trim();
+				currentHotelName = hotelName;
 			} catch (Exception e) {
 				// do nothing or pop up error message.
 			}
@@ -385,25 +385,25 @@ public class ClientController implements ActionListener {
 			currentLocation = location;
 		}
 		
-		doSearchCaterers(maxguests, currentLocation);
+		doSearchCaterers(hotelName, currentLocation);
 		
 	}
 	
-	private void doSearchCaterers(int maxguests, String location) {
+	private void doSearchCaterers(String hotelName, String location) {
 		try {
 			
-			if (location != null && maxguests != -1) {
-				currentQuery = "viewbyguestslocation";
-				refreshView(currentQuery, maxguests, location);
+			if (location != null && hotelName != null && !hotelName.trim().isEmpty()) {
+				currentQuery = "viewbyhotelnameandlocation";
+				refreshView(currentQuery, hotelName, location);
 			} else if (location != null) {
 				currentQuery = "viewbylocation";
-				refreshView(currentQuery, -1, location);
-			} else if (maxguests != -1) {
-				currentQuery = "viewbyguests";
-				refreshView(currentQuery, maxguests, "");
+				refreshView(currentQuery, "", location);
+			} else if (hotelName != null && !hotelName.trim().isEmpty()) {
+				currentQuery = "viewbyhotelname";
+				refreshView(currentQuery, hotelName, "");
 			} else {
 				currentQuery = "viewall";
-				refreshView(currentQuery, -1, "");
+				refreshView(currentQuery, "", "");
 			}
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(appFrame, "Exception occured in processing request : " + e.getMessage(),
@@ -413,9 +413,9 @@ public class ClientController implements ActionListener {
 		
 	}
 	
-	private void doViewAllCaterers() {
+	public void doViewAllCaterers() {
 		currentQuery = "viewall";
-		refreshView(currentQuery, -1, "");
+		refreshView(currentQuery, null, null);
 	}
 	
 	/**
@@ -425,7 +425,7 @@ public class ClientController implements ActionListener {
 	 * @param maxguests
 	 * @param location
 	 */
-	private void refreshView(String query, int maxguests, String location) {
+	private void refreshView(String query, String hotelName, String location) {
 		if (currentServer == null) {
 			JOptionPane.showMessageDialog(appFrame, "Please connect to a server first. ", "Unconnected",
 					JOptionPane.INFORMATION_MESSAGE);
@@ -436,16 +436,15 @@ public class ClientController implements ActionListener {
 			if ("viewall".equals(query)) {
 				data = currentServer.getAllCaterers();
 				
-			} else if ("viewbyguests".equals(query)) {
-				data = currentServer.searchCaterersByMaxGuests(maxguests);
+			} else if ("viewbyhotelname".equals(query)) {
+				data = currentServer.searchCaterersByHotelName(hotelName);
 			} else if ("viewbylocation".equals(query)) {
 				data = currentServer.searchCaterersByLocation(location);
-			} else if ("viewbyguestslocation".equals(query)) {
-				data = currentServer.searchCaterersByMaxGuestsAndLocation(maxguests, location);
+			} else if ("viewbyhotelnameandlocation".equals(query)) {
+				data = currentServer.searchCaterersByHotelNameAndLocation(hotelName, location);
 			}
 			mainModel.setDisplayRows(data);
 			mainModel.notifyObservers();
-			mainModel.getMessageModel().updateModel("Please double click on a caterer to book.");
 			mainModel.getMessageModel().notifyObservers();
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(appFrame, "Exception occured in processing request : " + e.getMessage(),
