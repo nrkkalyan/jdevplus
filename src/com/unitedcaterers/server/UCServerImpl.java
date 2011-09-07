@@ -101,7 +101,7 @@ public class UCServerImpl implements UCServer {
 			recordNo = Integer.parseInt(originalData[0]);
 			lockkey = db.lock(recordNo);
 			String[] data = db.read(recordNo);
-			if (data[5] == null || data[5].trim().length() == 0) {
+			if (data[6] == null || data[6].trim().length() == 0) {
 				boolean datachanged = false;
 				for (int n = 1; n < originalData.length; n++) {
 					// First element of original data is the record number so
@@ -117,10 +117,10 @@ public class UCServerImpl implements UCServer {
 					// row will be unlocked in finally clause
 					throw new UCException("The caterer data was updated. Please refresh your view and try again.");
 				}
-				data[5] = customerid;
+				data[6] = customerid;
 				db.update(recordNo, data, lockkey);
 				status = true;
-			} else if (data[5].trim().equals(customerid)) {
+			} else if (data[6].trim().equals(customerid)) {
 				status = true;
 			} else
 				throw new UCException("This caterer is already booked.");

@@ -72,7 +72,8 @@ public class DBLockTester extends Thread {
 			record[2] = "Wedding";
 			record[3] = "30";
 			record[4] = "13.50";
-			record[5] = "";
+			record[5] = "2001/1/1";
+			record[6] = "";
 			int randomRecNo = (int) (Math.random() * 9);
 			// a while loop would be better here, but what are the chances!
 			if (randomRecNo == DBLockTester.recNo) {

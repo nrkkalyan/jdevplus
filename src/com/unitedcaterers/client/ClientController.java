@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 import com.unitedcaterers.UCServer;
+import com.unitedcaterers.client.gui.EightDigitsTextField;
 import com.unitedcaterers.client.gui.UCClientPropertiesDialog;
 import com.unitedcaterers.server.UCServerImpl;
 
@@ -299,10 +300,12 @@ public class ClientController implements ActionListener {
 			data = mainModel.getDisplayRows()[ind];
 		}
 		
-		// KALYAN: Change to Booking Dialog
-		String customerid = JOptionPane.showInputDialog(appFrame, "Please enter the customerid :", "Book Caterer",
-				JOptionPane.INFORMATION_MESSAGE);
-		if (customerid != null) {
+		EightDigitsTextField customerIDTextField = new EightDigitsTextField();
+		// KALYAN: Change to Booking D
+		Object[] arrayMessage = { "Enter customer ID (8 digits only):", customerIDTextField };
+		int value = JOptionPane.showConfirmDialog(appFrame, arrayMessage, "Input", JOptionPane.OK_CANCEL_OPTION);
+		if (value == 0 && customerIDTextField.isEditValid()) {
+			String customerid = customerIDTextField.getText();
 			// you may also add validation code for customerid here. For
 			// example, you can check if it contains any spaces or junk
 			// characters
@@ -310,9 +313,6 @@ public class ClientController implements ActionListener {
 				
 				boolean status = currentServer.bookCaterer(customerid, data);
 				if (status) {
-					// JOptionPane.showMessageDialog(appFrame, "Thank you, " +
-					// data[1] + " has been booked.",
-					// "Book Caterer", JOptionPane.INFORMATION_MESSAGE);
 					refreshView(currentQuery, currentHotelName, currentLocation);
 				} else {
 					JOptionPane.showMessageDialog(appFrame, "Sorry, Unable to book this caterer.", "Book Caterer",
@@ -323,6 +323,9 @@ public class ClientController implements ActionListener {
 						"Book Caterer", JOptionPane.INFORMATION_MESSAGE);
 			}
 			
+		} else {
+			JOptionPane.showMessageDialog(appFrame, "Invalid cuatomer id", "Book Caterer",
+					JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 	
