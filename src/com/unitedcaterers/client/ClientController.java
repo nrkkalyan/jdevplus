@@ -300,6 +300,12 @@ public class ClientController implements ActionListener {
 			data = mainModel.getDisplayRows()[ind];
 		}
 		
+		if (data[7] != null && data[7].length() > 0) {
+			JOptionPane.showMessageDialog(appFrame, "Room is already booked.", "Book Caterer",
+					JOptionPane.INFORMATION_MESSAGE);
+			return;
+		}
+		
 		EightDigitsTextField customerIDTextField = new EightDigitsTextField();
 		// KALYAN: Change to Booking D
 		Object[] arrayMessage = { "Enter customer ID (8 digits only):", customerIDTextField };

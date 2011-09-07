@@ -26,11 +26,11 @@ import javax.swing.border.TitledBorder;
  * controller.
  */
 public class ControlPanel extends BasePanel implements ActionListener {
-	JMenuBar	mb;
-	JTextField	hotelnameTF	= new JTextField(10);
-	JTextField	locationTF	= new JTextField(10);
-	JButton		searchBT	= new JButton("Search");
-	JButton		bookBT		= new JButton("Reserve");
+	private final JMenuBar		mb;
+	private final JTextField	hotelnameTF	= new JTextField(10);
+	private final JTextField	locationTF	= new JTextField(10);
+	private final JButton		searchBT	= new JButton("Search");
+	private final JButton		bookBT		= new JButton("Reserve");
 	
 	/**
 	 * ClientControlPanel constructor. You may also include connect and
@@ -131,4 +131,5 @@ public class ControlPanel extends BasePanel implements ActionListener {
 	public void update(Observable model, Object obj) {
 		// does nothing.
 	}
+	
 }

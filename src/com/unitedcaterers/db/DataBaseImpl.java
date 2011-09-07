@@ -106,7 +106,7 @@ public class DataBaseImpl implements DataBase {
 		
 	}
 	
-	private static byte	DELETEDROW_BYTE1	= (byte) '1';
+	private final static byte	DELETEDROW_BYTE1	= (byte) '1';
 	
 	/**
 	 * Reads a record from the file.
@@ -279,10 +279,10 @@ public class DataBaseImpl implements DataBase {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(baos);
 		
-		String deleted = "  ";
-		char[] ca = new char[2];
+		String deleted = " ";
+		char[] ca = new char[1];
 		deleted.getChars(0, deleted.length(), ca, 0);
-		for (int x = 0; x < 2; x++) {
+		for (int x = 0; x < 1; x++) {
 			dos.write(ca[x]);
 		}
 		
