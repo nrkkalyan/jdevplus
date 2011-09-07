@@ -327,6 +327,7 @@ public class ClientController implements ActionListener {
 			} catch (Exception e) {
 				JOptionPane.showMessageDialog(appFrame, "Unable to book the caterer. " + e.getMessage(),
 						"Book Caterer", JOptionPane.INFORMATION_MESSAGE);
+				refreshView(currentQuery, currentHotelName, currentLocation);
 			}
 			
 		} else {
