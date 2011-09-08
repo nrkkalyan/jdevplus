@@ -6,10 +6,7 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -155,68 +152,6 @@ public class DataBaseImpl implements DataBase {
 			startind = startind + fieldlength;
 		}
 		return returnValue;
-	}
-	
-	private synchronized Room roomInstanceFromByteArray(final byte[] array, int recordNumber) throws IOException {
-		if (array == null) {
-			throw new IllegalArgumentException("Invalid parameter length");
-		}
-		
-		class RecordFieldReader {
-			
-			private int	offset1	= 1;
-			
-			private String read(int length) throws UnsupportedEncodingException {
-				String str = new String(array, offset1, length, CHARSET);
-				offset1 += length;
-				return str.trim();
-			}
-		}
-		RecordFieldReader readRecord = new RecordFieldReader();
-		Room room = new Room();
-		room.setRecordNumber(recordNumber);
-		room.setValid(true);
-		room.setName(readRecord.read(DBConstants.HOTEL_NAME_LENGTH));
-		room.setLocation(readRecord.read(DBConstants.CITY_LENGTH));
-		room.setSize(readRecord.read(DBConstants.SIZE_LENGTH));
-		room.setSmoking(readRecord.read(DBConstants.SMOKING_LENGTH));
-		room.setRate(readRecord.read(DBConstants.RATE_LENGTH));
-		room.setDate(dateStringToDate(readRecord.read(DBConstants.DATE_LENGTH)));
-		room.setCustomerId(readRecord.read(DBConstants.CUSTOMER_ID_LENGTH));
-		
-		return room;
-		
-	}
-	
-	private boolean validityFlagToboolean(byte flag) {
-		return DBConstants.VALID_RECORD_FLAG == flag;
-	}
-	
-	public Date dateStringToDate(String date) {
-		if (date != null) {
-			try {
-				synchronized (DBConstants.DATEFORMAT) {
-					return DBConstants.DATEFORMAT.parse(date);
-				}
-			} catch (ParseException e) {
-				throw new IllegalArgumentException(e);
-			}
-		}
-		return null;
-	}
-	
-	public static Boolean smokingFlagToBoolean(String flag) {
-		if (DBConstants.SMOKING_FLAG_YES.equals(flag)) {
-			return Boolean.TRUE;
-		} else {
-			return Boolean.FALSE;
-		}
-	}
-	
-	private synchronized String readNBytes(byte[] input, int length) throws IOException {
-		String str = new String(input, offset, length, CHARSET);
-		offset += length;
-		return str.trim();
 	}
 	
 	/**
@@ -373,15 +308,13 @@ public class DataBaseImpl implements DataBase {
 					recno++;
 					continue;
 				}
-				Room room = roomInstanceFromByteArray(ba, recno);
-				System.out.println(room);
 				String[] fielddata = parseRecord(rec);
 				boolean match = true;
 				for (int i = 0; i < fieldnames.length; i++) {
 					if (criteria[i] == null) {
 						continue;
 					}
-					if (!fielddata[i].startsWith(criteria[i])) {
+					if (!fielddata[i].matches(criteria[i])) {
 						match = false;
 						break;
 					}
@@ -446,13 +379,10 @@ public class DataBaseImpl implements DataBase {
 			int retval = 0;
 			ras.seek(offset);
 			byte[] ba = new byte[recordlength];
-			int noofbytesread = 0;
-			while ((noofbytesread = ras.read(ba)) == recordlength) {
-				
+			while (ras.read(ba) == recordlength) {
 				if (ba[0] == DELETEDROW_BYTE1) {
 					return retval;
 				}
-				
 				retval++;
 				ba = new byte[recordlength];
 			}
