@@ -7,7 +7,6 @@ import javax.swing.JFrame;
 
 import com.unitedcaterers.client.gui.CaterersDataPanel;
 import com.unitedcaterers.client.gui.ControlPanel;
-import com.unitedcaterers.client.gui.MessagePanel;
 
 /**
  * This class is the main View of the application and forms the V of MVC
@@ -21,22 +20,18 @@ import com.unitedcaterers.client.gui.MessagePanel;
 public class ClientFrame extends JFrame {
 	
 	/**
+	 * 
+	 */
+	private static final long	serialVersionUID	= 1L;
+	/**
 	 * A panel that houses a menubar.
 	 */
-	private ControlPanel		controlPanel	= null;
+	private ControlPanel		controlPanel		= null;
 	/**
 	 * A panel that houses a JTable. It displays caterer information contained
 	 * within ClientModel.
 	 */
-	private CaterersDataPanel	tablePanel		= null;
-	/**
-	 * A panel that displays messages contained within MessageModel.
-	 */
-	private MessagePanel		messagePanel	= null;
-	/**
-	 * The controller.
-	 */
-	private ActionListener		al				= null;
+	private CaterersDataPanel	tablePanel			= null;
 	
 	/**
 	 * 1. Constructs the main view frame. 2. instantiates ControlPanel (which
@@ -49,7 +44,6 @@ public class ClientFrame extends JFrame {
 		super("United Caterers Booking System");
 		controlPanel = new ControlPanel();
 		setTablePanel(new CaterersDataPanel());
-		messagePanel = new MessagePanel();
 		initGUI();
 	}
 	
@@ -59,7 +53,7 @@ public class ClientFrame extends JFrame {
 	private void initGUI() {
 		this.getContentPane().add(BorderLayout.NORTH, getControlPanel());
 		this.getContentPane().add(BorderLayout.CENTER, getTablePanel());
-		this.getContentPane().add(BorderLayout.SOUTH, getMessagePanel());
+		// this.getContentPane().add(BorderLayout.SOUTH, getMessagePanel());
 	}
 	
 	/**
@@ -77,7 +71,6 @@ public class ClientFrame extends JFrame {
 	 *            architecture.
 	 */
 	public void setController(ActionListener al) {
-		this.al = al;
 		getControlPanel().addUserActionListener(al);
 	}
 	
@@ -95,7 +88,7 @@ public class ClientFrame extends JFrame {
 	 */
 	public void setModel(ClientModel cm) {
 		cm.addObserver(getTablePanel());
-		cm.getMessageModel().addObserver(getMessagePanel());
+		// cm.getMessageModel().addObserver(getMessagePanel());
 	}
 	
 	public ControlPanel getControlPanel() {
@@ -110,7 +103,4 @@ public class ClientFrame extends JFrame {
 		this.tablePanel = tablePanel;
 	}
 	
-	public MessagePanel getMessagePanel() {
-		return messagePanel;
-	}
 }

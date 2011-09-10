@@ -6,8 +6,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.unitedcaterers.UCServer;
-import com.unitedcaterers.db.DataBase;
-import com.unitedcaterers.db.DataBaseImpl;
+import com.unitedcaterers.db.DB;
+import com.unitedcaterers.db.Data;
 import com.unitedcaterers.db.RecordNotFoundException;
 import com.unitedcaterers.util.UCException;
 
@@ -36,12 +36,12 @@ import com.unitedcaterers.util.UCException;
 
 public class UCServerImpl implements UCServer {
 	protected static Logger	logger	= Logger.getLogger("com.unitedcaterers.server.UCServer");
-	private DataBase		db;
+	private DB				db;
 	
 	// a boolean flag to determine whether there is a valid db or not.
 	public UCServerImpl(String dbfilename, String magiccode) throws RemoteException, UCException {
 		try {
-			db = new DataBaseImpl(dbfilename, magiccode);
+			db = new Data(dbfilename, magiccode);
 		} catch (IOException ioe) {
 			throw new UCException("Unable to connect to the database. : " + ioe.getMessage());
 		}
@@ -107,7 +107,7 @@ public class UCServerImpl implements UCServer {
 					// First element of original data is the record number so
 					// second element of originalData matches with the first
 					// element of data.
-					if (!originalData[n].trim().equals(data[n - 1])) {
+					if (!originalData[n].trim().equals(data[n - 1].trim())) {
 						datachanged = true;
 						break;
 					}
@@ -210,7 +210,7 @@ public class UCServerImpl implements UCServer {
 				retval[i] = new String[data.length + 1];
 				retval[i][0] = "" + ia[i];
 				for (int j = 0; j < data.length; j++) {
-					retval[i][j + 1] = data[j];
+					retval[i][j + 1] = data[j].trim();
 				}
 			}
 			db.unlock(-1, lockkey);
@@ -235,7 +235,7 @@ public class UCServerImpl implements UCServer {
 	 * DataBaseImpl
 	 */
 	public void close() {
-		((DataBaseImpl) db).close();
+		((Data) db).close();
 		db = null;
 	}
 }

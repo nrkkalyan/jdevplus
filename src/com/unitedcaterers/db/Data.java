@@ -11,13 +11,15 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.unitedcaterers.util.UCException;
+
 /**
  * This class implements the DataBase interface.
  * 
  * @author Enthuware
  * @version 1.0
  */
-public class DataBaseImpl implements DataBase {
+public class Data implements DB {
 	
 	private static Logger					logger					= Logger.getLogger("DataBaseImpl");
 	private int								offset;
@@ -41,12 +43,6 @@ public class DataBaseImpl implements DataBase {
 	/** The bytes that store the fields length */
 	private static final int				FIELD_LENGTH_BYTES		= 2;
 	
-	/** The bytes that store the flag of each record */
-	private static final int				RECORD_FLAG_BYTES		= 1;
-	
-	/** The value that identifies a record as being valid */
-	private static final int				VALID					= 0;
-	
 	/**
 	 * This hashmap holds the lock information for records.
 	 */
@@ -66,12 +62,16 @@ public class DataBaseImpl implements DataBase {
 	 *             This exception is thrown if there is a problem in
 	 *             reading/writing the db file or if the given magiccode does
 	 *             not match with the magiccode stored in the dbfile.
+	 * @throws SecurityException
 	 */
-	public DataBaseImpl(String dbfilename, String magiccode2) throws IOException {
+	public Data(String dbfilename, String magiccode2) throws IOException, UCException {
 		FileInputStream fis = new FileInputStream(dbfilename);
 		DataInputStream dis = new DataInputStream(fis);
 		
 		int magicCookie = dis.readInt();
+		if (magicCookie != DBConstants.MAGIC_COOKIE_REFERENCE) {
+			throw new UCException("Invalid cookie in specified database file");
+		}
 		offset += MAGIC_COOKIE_BYTES + RECORD_LENGTH_BYTES + NUMBER_OF_FIELDS_BYTES;
 		recordlength = dis.readInt();
 		int nooffields = dis.readShort();
@@ -103,7 +103,8 @@ public class DataBaseImpl implements DataBase {
 		
 	}
 	
-	private final static byte	DELETEDROW_BYTE1	= (byte) '1';
+	private final static byte	DELETEDROW_BYTE1	= 0X1;
+	private final static byte	VALIDROW_BYTE1		= 0X0;
 	
 	/**
 	 * Reads a record from the file.
@@ -148,7 +149,7 @@ public class DataBaseImpl implements DataBase {
 		int startind = 1;// first 1 bytes are for delete flag so ignore them.
 		for (int i = 0; i < fieldnames.length; i++) {
 			int fieldlength = (fieldmap.get(fieldnames[i])).intValue();
-			returnValue[i] = recorddata.substring(startind, startind + fieldlength).trim();
+			returnValue[i] = recorddata.substring(startind, startind + fieldlength);
 			startind = startind + fieldlength;
 		}
 		return returnValue;
@@ -194,6 +195,7 @@ public class DataBaseImpl implements DataBase {
 					throw new RecordNotFoundException("This record has been deleted : " + recNo);
 				}
 				ras.seek(offset + recNo * recordlength);
+				ras.writeByte(VALIDROW_BYTE1);
 				ras.write(getByteArray(data));
 			} catch (IOException e) {
 				throw new SecurityException("Unable to update the record : " + recNo + " : " + e.getMessage());
@@ -213,19 +215,14 @@ public class DataBaseImpl implements DataBase {
 	private byte[] getByteArray(String[] data) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(baos);
-		
-		String deleted = " ";
-		char[] ca = new char[1];
-		deleted.getChars(0, deleted.length(), ca, 0);
-		for (int x = 0; x < 1; x++) {
-			dos.write(ca[x]);
-		}
-		
 		for (int i = 0; i < fieldnames.length; i++) {
-			String field = data[i].trim();
+			String field = data[i];
 			short flength = (fieldmap.get(fieldnames[i])).shortValue();
-			ca = new char[flength];
-			field.getChars(0, field.length() > flength ? flength : field.length(), ca, 0);
+			byte[] ca = new byte[flength];
+			int j = 0;
+			for (byte b : field.getBytes()) {
+				ca[j++] = b;
+			}
 			for (int x = 0; x < flength; x++) {
 				dos.write(ca[x]);
 			}
@@ -361,6 +358,7 @@ public class DataBaseImpl implements DataBase {
 		try {
 			int deletedRecNo = getDeletedRecordNo();
 			ras.seek(offset + deletedRecNo * recordlength);
+			ras.writeByte(VALIDROW_BYTE1);
 			ras.write(getByteArray(data));
 			return deletedRecNo;
 		} catch (Exception e) {
@@ -551,10 +549,10 @@ public class DataBaseImpl implements DataBase {
 	 */
 	public static class LockTestThread extends Thread {
 		
-		private String			name	= "";
-		private DataBaseImpl	dbi		= null;
+		private String	name	= "";
+		private Data	dbi		= null;
 		
-		public LockTestThread(String name, DataBaseImpl db) {
+		public LockTestThread(String name, Data db) {
 			LockTestThread.this.dbi = db;
 			LockTestThread.this.name = name;
 			
@@ -600,7 +598,7 @@ public class DataBaseImpl implements DataBase {
 		try {
 			this.lock(-1); // waits till all clients are done
 		} catch (RecordNotFoundException ex) {
-			Logger.getLogger(DataBaseImpl.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(Data.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		
 		synchronized (this) {

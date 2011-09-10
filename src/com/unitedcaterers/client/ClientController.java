@@ -58,18 +58,19 @@ public class ClientController implements ActionListener {
 	 * This dialog is used to capture connection properties.
 	 */
 	private final UCClientPropertiesDialog	pd;
+	
 	/**
 	 * This variable is required only because we have multiple implementations
 	 * of the project: rmi and socket. In your actual project, you will not need
 	 * this.
 	 */
-	public static String					rmiorsocket		= "rmi";															// other
-																																// values
-																																// are
-																																// "socket"
-																																// and
-																																// "none"
-																																
+	// public static String mClientType = "rmi"; // other
+	// values
+	// are
+	// "socket"
+	// and
+	// "none"
+	
 	/**
 	 * This constructor takes a ClientFrame and the clientType, which should be
 	 * rmi, socket, or none. If none is passed, it denotes that a no remote
@@ -83,7 +84,7 @@ public class ClientController implements ActionListener {
 		this.appFrame = clientFrame;
 		pd = new UCClientPropertiesDialog(appFrame);
 		this.localflag = "none".equals(clientType);
-		ClientController.rmiorsocket = clientType;
+		// mClientType = clientType;
 		this.appFrame.addWindowListener(new WindowAdapter() {
 			
 			// closes the server side component only if the client is a
@@ -235,8 +236,8 @@ public class ClientController implements ActionListener {
 												// String array everytime.
 			mainModel.setDisplayRows(data);
 			mainModel.notifyObservers();
-			mainModel.getMessageModel().updateModel("Please use File Menu to search for caterers.");
-			mainModel.getMessageModel().notifyObservers();
+			// mainModel.getMessageModel().updateModel("Please use File Menu to search for caterers.");
+			// mainModel.getMessageModel().notifyObservers();
 			
 		} else if ("VIEWALL_CATERERS".equals(action)) {
 			doViewAllCaterers();
@@ -255,8 +256,8 @@ public class ClientController implements ActionListener {
 			}
 			doSearchCaterers(cap, loc);
 		} else if (action.indexOf("BOOK_CATERER") != -1) {
-			doBookCaterer(action); // ActionCommand for this would be like:
-									// BOOK_CATERER:12
+			bookRoom(action); // ActionCommand for this would be like:
+								// BOOK_CATERER:12
 		} else if ("APP_HELP".equals(action)) {
 			JOptionPane.showMessageDialog(appFrame,
 					"To learn how to use the application please see \\docs\\userguide.txt ", "Help",
@@ -279,7 +280,7 @@ public class ClientController implements ActionListener {
 	 *            The the complete action command that has row index attached to
 	 *            it.
 	 */
-	public void doBookCaterer(String action) {
+	public void bookRoom(String action) {
 		if (currentServer == null) {
 			JOptionPane.showMessageDialog(appFrame, "Please connect to a server before booking.", "Book Caterer",
 					JOptionPane.INFORMATION_MESSAGE);
@@ -300,7 +301,7 @@ public class ClientController implements ActionListener {
 			data = mainModel.getDisplayRows()[ind];
 		}
 		
-		if (data[7] != null && data[7].length() > 0) {
+		if (data[7] != null && data[7].trim().length() > 0) {
 			JOptionPane.showMessageDialog(appFrame, "Room is already booked.", "Book Caterer",
 					JOptionPane.INFORMATION_MESSAGE);
 			return;
@@ -310,7 +311,12 @@ public class ClientController implements ActionListener {
 		// KALYAN: Change to Booking D
 		Object[] arrayMessage = { "Enter customer ID (8 digits only):", customerIDTextField };
 		int value = JOptionPane.showConfirmDialog(appFrame, arrayMessage, "Input", JOptionPane.OK_CANCEL_OPTION);
-		if (value == 0 && customerIDTextField.isEditValid()) {
+		if (value == 0) {
+			if (!customerIDTextField.isEditValid()) {
+				JOptionPane.showMessageDialog(appFrame, "Invalid Customer id.(8 digits) ", "Book Caterer",
+						JOptionPane.WARNING_MESSAGE);
+				return;
+			}
 			String customerid = customerIDTextField.getText();
 			// you may also add validation code for customerid here. For
 			// example, you can check if it contains any spaces or junk
@@ -325,14 +331,12 @@ public class ClientController implements ActionListener {
 							JOptionPane.INFORMATION_MESSAGE);
 				}
 			} catch (Exception e) {
+				e.printStackTrace();
 				JOptionPane.showMessageDialog(appFrame, "Unable to book the caterer. " + e.getMessage(),
 						"Book Caterer", JOptionPane.INFORMATION_MESSAGE);
 				refreshView(currentQuery, currentHotelName, currentLocation);
 			}
 			
-		} else {
-			JOptionPane.showMessageDialog(appFrame, "Invalid cuatomer id", "Book Caterer",
-					JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 	
@@ -457,7 +461,7 @@ public class ClientController implements ActionListener {
 			}
 			mainModel.setDisplayRows(data);
 			mainModel.notifyObservers();
-			mainModel.getMessageModel().notifyObservers();
+			// mainModel.getMessageModel().notifyObservers();
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(appFrame, "Exception occured in processing request : " + e.getMessage(),
 					"UC Message", JOptionPane.ERROR_MESSAGE);

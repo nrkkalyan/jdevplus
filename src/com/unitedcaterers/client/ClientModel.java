@@ -11,20 +11,20 @@ public class ClientModel extends java.util.Observable {
 	 * The rows to be displayed in the CatererDataPanel. Controller retrives the
 	 * rows from the DB and updates this. View takes this and displays the data.
 	 */
-	private String[][]		displayRows;
+	private String[][]	displayRows;
 	/**
 	 * This contains the message that has to be displayed by the MessagePanel.
 	 * For now, it only contains a string but later on more things may be added.
 	 */
-	private MessageModel	msgModel		= new MessageModel();
+	// private MessageModel msgModel = new MessageModel();
 	/**
 	 * The column widths for the CatererDataPanel.
 	 */
-	private int[]			columnWidths	= new int[0];
+	private int[]		columnWidths	= new int[0];
 	/**
 	 * The column names for the CatererDataPanel.
 	 */
-	private String[]		columns			= new String[0];
+	private String[]	columns			= new String[0];
 	
 	/**
 	 * ClientModel constructor. Initializes the static data like Column Names
@@ -62,9 +62,9 @@ public class ClientModel extends java.util.Observable {
 	/**
 	 * Returns the messagemodel.
 	 */
-	public MessageModel getMessageModel() {
-		return msgModel;
-	}
+	// public MessageModel getMessageModel() {
+	// return msgModel;
+	// }
 	
 	/**
 	 * Sets the rows to be displayed. Used by the controller.
@@ -86,8 +86,8 @@ public class ClientModel extends java.util.Observable {
 	 * @param newModel
 	 *            newModel
 	 */
-	public void setMessageModel(MessageModel newModel) {
-		msgModel = newModel;
-		setChanged();
-	}
+	// public void setMessageModel(MessageModel newModel) {
+	// msgModel = newModel;
+	// setChanged();
+	// }
 }

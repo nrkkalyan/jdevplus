@@ -11,12 +11,12 @@ import java.util.logging.Logger;
 
 public class DBLockTester extends Thread {
 	
-	private static DataBaseImpl	data	= null;
+	private static Data	data	= null;
 	
 	static {
 		try {
 			String filePath = "c:\\temp\\ucdb.db";
-			data = new DataBaseImpl(filePath, "UCDB");
+			data = new Data(filePath, "UCDB");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

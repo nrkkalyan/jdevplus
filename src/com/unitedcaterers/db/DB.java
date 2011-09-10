@@ -52,7 +52,7 @@ package com.unitedcaterers.db;
  * @author Enthuware
  * @version 1.0
  */
-public interface DataBase {
+public interface DB {
 	
 	/**
 	 * 
