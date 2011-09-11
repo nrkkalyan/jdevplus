@@ -3,8 +3,10 @@ package com.unitedcaterers.client.gui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.Observable;
+import java.util.Observer;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -17,7 +19,7 @@ import com.unitedcaterers.client.ClientModel;
  * are displayed in the JTable.
  * 
  */
-public class CaterersDataPanel extends BasePanel {
+public class TablePanel extends JPanel implements Observer {
 	
 	JTable						recordJTable			= null;
 	CDModel						cdModel					= null;
@@ -86,7 +88,7 @@ public class CaterersDataPanel extends BasePanel {
 		}
 	}
 	
-	public CaterersDataPanel() {
+	public TablePanel() {
 		super();
 		
 		cdModel = new CDModel();
@@ -113,7 +115,7 @@ public class CaterersDataPanel extends BasePanel {
 	public static void main(String[] args) {
 		ClientModel cm = new ClientModel();
 		JFrame jf = new JFrame();
-		CaterersDataPanel cdp = new CaterersDataPanel();
+		TablePanel cdp = new TablePanel();
 		cdp.update(cm, new Boolean(true));
 		jf.setSize(600, 400);
 		jf.getContentPane().add("Center", cdp);

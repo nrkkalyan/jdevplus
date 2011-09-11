@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Observable;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -25,12 +24,13 @@ import javax.swing.border.TitledBorder;
  * this panel and then appropriate User action events are sent to the
  * controller.
  */
-public class ControlPanel extends BasePanel implements ActionListener {
+public class ControlPanel extends JPanel implements ActionListener {
 	private final JMenuBar		mb;
 	private final JTextField	hotelnameTF	= new JTextField(10);
 	private final JTextField	locationTF	= new JTextField(10);
 	private final JButton		searchBT	= new JButton("Search");
 	private final JButton		bookBT		= new JButton("Reserve");
+	private ActionListener		actionListener;
 	
 	/**
 	 * ClientControlPanel constructor. You may also include connect and
@@ -66,10 +66,10 @@ public class ControlPanel extends BasePanel implements ActionListener {
 	}
 	
 	private JPanel addSearchAndBookPanel() {
-		JPanel searchAndBookPanel = new JPanel(new BorderLayout());
 		
 		JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		JPanel textFieldPanel = new JPanel(new BorderLayout());
+		
 		JPanel namePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		namePanel.add(new JLabel("Hotel Name"));
 		hotelnameTF.setToolTipText("Enter Hotel Name");
@@ -83,6 +83,8 @@ public class ControlPanel extends BasePanel implements ActionListener {
 		textFieldPanel.add(locationPanel, BorderLayout.SOUTH);
 		searchPanel.add(textFieldPanel);
 		
+		searchPanel.add(textFieldPanel);
+		
 		searchPanel.add(searchBT);
 		searchPanel.add(bookBT);
 		// Add a border to the search panel
@@ -91,9 +93,7 @@ public class ControlPanel extends BasePanel implements ActionListener {
 		searchBorder.setTitleJustification(TitledBorder.CENTER);
 		searchPanel.setBorder(searchBorder);
 		
-		searchAndBookPanel.add(searchPanel, BorderLayout.SOUTH);
-		
-		return searchAndBookPanel;
+		return searchPanel;
 	}
 	
 	@Override
@@ -104,7 +104,7 @@ public class ControlPanel extends BasePanel implements ActionListener {
 			String location = locationTF.getText();
 			ae = new ActionEvent(searchBT, ae.getID(), "SEARCH_CATERERS_WITH_PARAMS:" + hotelname + "," + location);
 		}
-		postUserActionEvent(ae);
+		actionListener.actionPerformed(ae);
 	}
 	
 	/**
@@ -127,9 +127,16 @@ public class ControlPanel extends BasePanel implements ActionListener {
 	 * the user is doing, some menus/menuitems are enabled and some are
 	 * disabled. update() method is useful in such cases.
 	 */
-	@Override
-	public void update(Observable model, Object obj) {
-		// does nothing.
+	// @Override
+	// public void update(Observable model, Object obj) {
+	// // does nothing.
+	// }
+	
+	/**
+	 * @param al
+	 */
+	public void setUserActionListener(ActionListener al) {
+		actionListener = al;
 	}
 	
 }

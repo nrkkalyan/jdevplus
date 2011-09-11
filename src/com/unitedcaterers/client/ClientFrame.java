@@ -5,8 +5,8 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
 
-import com.unitedcaterers.client.gui.CaterersDataPanel;
 import com.unitedcaterers.client.gui.ControlPanel;
+import com.unitedcaterers.client.gui.TablePanel;
 
 /**
  * This class is the main View of the application and forms the V of MVC
@@ -31,7 +31,7 @@ public class ClientFrame extends JFrame {
 	 * A panel that houses a JTable. It displays caterer information contained
 	 * within ClientModel.
 	 */
-	private CaterersDataPanel	tablePanel			= null;
+	private TablePanel			tablePanel			= null;
 	
 	/**
 	 * 1. Constructs the main view frame. 2. instantiates ControlPanel (which
@@ -43,17 +43,9 @@ public class ClientFrame extends JFrame {
 	public ClientFrame() {
 		super("United Caterers Booking System");
 		controlPanel = new ControlPanel();
-		setTablePanel(new CaterersDataPanel());
-		initGUI();
-	}
-	
-	/**
-	 * Puts the components in proper places in the Frame.
-	 */
-	private void initGUI() {
-		this.getContentPane().add(BorderLayout.NORTH, getControlPanel());
-		this.getContentPane().add(BorderLayout.CENTER, getTablePanel());
-		// this.getContentPane().add(BorderLayout.SOUTH, getMessagePanel());
+		tablePanel = new TablePanel();
+		this.getContentPane().add(BorderLayout.NORTH, controlPanel);
+		this.getContentPane().add(BorderLayout.CENTER, tablePanel);
 	}
 	
 	/**
@@ -71,7 +63,7 @@ public class ClientFrame extends JFrame {
 	 *            architecture.
 	 */
 	public void setController(ActionListener al) {
-		getControlPanel().addUserActionListener(al);
+		controlPanel.setUserActionListener(al);
 	}
 	
 	/**
@@ -88,19 +80,10 @@ public class ClientFrame extends JFrame {
 	 */
 	public void setModel(ClientModel cm) {
 		cm.addObserver(getTablePanel());
-		// cm.getMessageModel().addObserver(getMessagePanel());
 	}
 	
-	public ControlPanel getControlPanel() {
-		return controlPanel;
-	}
-	
-	public CaterersDataPanel getTablePanel() {
+	public TablePanel getTablePanel() {
 		return tablePanel;
-	}
-	
-	public void setTablePanel(CaterersDataPanel tablePanel) {
-		this.tablePanel = tablePanel;
 	}
 	
 }
