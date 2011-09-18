@@ -12,19 +12,11 @@ public class ClientModel extends java.util.Observable {
 	 * rows from the DB and updates this. View takes this and displays the data.
 	 */
 	private String[][]	displayRows;
-	/**
-	 * This contains the message that has to be displayed by the MessagePanel.
-	 * For now, it only contains a string but later on more things may be added.
-	 */
-	// private MessageModel msgModel = new MessageModel();
-	/**
-	 * The column widths for the CatererDataPanel.
-	 */
-	private int[]		columnWidths	= new int[0];
+	
 	/**
 	 * The column names for the CatererDataPanel.
 	 */
-	private String[]	columns			= new String[0];
+	private String[]	columns	= new String[0];
 	
 	/**
 	 * ClientModel constructor. Initializes the static data like Column Names
@@ -33,7 +25,6 @@ public class ClientModel extends java.util.Observable {
 	public ClientModel() {
 		super();
 		this.columns = new String[] { "Sr No", "Name", "Location", "Size", "Smoking", "Rate", "Date", "Owner" };
-		this.columnWidths = new int[] { 2, 15, 15, 1, 1, 8, 10, 10 };
 		setChanged(); // calling setChanged() signifies that the data in the
 						// model has changed.
 	}
@@ -46,25 +37,11 @@ public class ClientModel extends java.util.Observable {
 	}
 	
 	/**
-	 * Returns the column widths.
-	 */
-	public int[] getColumnWidths() {
-		return columnWidths;
-	}
-	
-	/**
 	 * Returns the rows to be displayed.
 	 */
 	public String[][] getDisplayRows() {
 		return displayRows;
 	}
-	
-	/**
-	 * Returns the messagemodel.
-	 */
-	// public MessageModel getMessageModel() {
-	// return msgModel;
-	// }
 	
 	/**
 	 * Sets the rows to be displayed. Used by the controller.
@@ -77,17 +54,4 @@ public class ClientModel extends java.util.Observable {
 		setChanged();
 	}
 	
-	/**
-	 * Sets the MessageModel. Used by the controller. Should not be called more
-	 * than once because views would be viewing this Model and replacing the
-	 * model itself will make the views view a stale model. In general, models
-	 * are created only once. The data that they contain keeps changing.
-	 * 
-	 * @param newModel
-	 *            newModel
-	 */
-	// public void setMessageModel(MessageModel newModel) {
-	// msgModel = newModel;
-	// setChanged();
-	// }
 }

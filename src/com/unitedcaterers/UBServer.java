@@ -20,7 +20,7 @@ import com.unitedcaterers.util.UCException;
  * exceptions.
  * */
 
-public interface UCServer extends java.rmi.Remote {
+public interface UBServer extends java.rmi.Remote {
 	String[][] searchCaterersByHotelName(String hotelName) throws RemoteException, UCException;
 	
 	String[][] searchCaterersByLocation(String location) throws RemoteException, UCException;

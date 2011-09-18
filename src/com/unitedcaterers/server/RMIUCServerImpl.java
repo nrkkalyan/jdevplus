@@ -3,7 +3,7 @@ package com.unitedcaterers.server;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
-import com.unitedcaterers.UCServer;
+import com.unitedcaterers.UBServer;
 import com.unitedcaterers.util.UCException;
 
 /**
@@ -13,12 +13,12 @@ import com.unitedcaterers.util.UCException;
  * it is exactly same as UCServer except that it is a remote class.
  */
 
-public class RMIUCServerImpl extends UnicastRemoteObject implements UCServer {
+public class RMIUCServerImpl extends UnicastRemoteObject implements UBServer {
 	
 	private final UCServerImpl	ucs;
 	
-	public RMIUCServerImpl(String dbfilename, String magiccode) throws RemoteException, UCException {
-		ucs = new UCServerImpl(dbfilename, magiccode);
+	public RMIUCServerImpl(String dbfilename) throws RemoteException, UCException {
+		ucs = new UCServerImpl(dbfilename);
 	}
 	
 	@Override
@@ -32,8 +32,7 @@ public class RMIUCServerImpl extends UnicastRemoteObject implements UCServer {
 	}
 	
 	@Override
-	public String[][] searchCaterersByHotelNameAndLocation(String hotelName, String location) throws RemoteException,
-			UCException {
+	public String[][] searchCaterersByHotelNameAndLocation(String hotelName, String location) throws RemoteException, UCException {
 		return ucs.searchCaterersByHotelNameAndLocation(hotelName, location);
 	}
 	

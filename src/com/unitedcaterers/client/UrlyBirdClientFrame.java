@@ -17,7 +17,7 @@ import com.unitedcaterers.client.gui.TablePanel;
  * notifyObservers() on the model.
  * 
  */
-public class ClientFrame extends JFrame {
+public class UrlyBirdClientFrame extends JFrame {
 	
 	/**
 	 * 
@@ -40,7 +40,7 @@ public class ClientFrame extends JFrame {
 	 * (which displays helpful messages to the user). 5. finally initializes the
 	 * GUI.
 	 */
-	public ClientFrame() {
+	public UrlyBirdClientFrame() {
 		super("United Caterers Booking System");
 		controlPanel = new ControlPanel();
 		tablePanel = new TablePanel();
@@ -62,8 +62,8 @@ public class ClientFrame extends JFrame {
 	 *            components. This is standard MVC (Model-View-Controller)
 	 *            architecture.
 	 */
-	public void setController(ActionListener al) {
-		controlPanel.setUserActionListener(al);
+	public void setCPActionListener(ActionListener al) {
+		controlPanel.setCPActionListener(al);
 	}
 	
 	/**
@@ -79,7 +79,7 @@ public class ClientFrame extends JFrame {
 	 *            appropriate models with the components.
 	 */
 	public void setModel(ClientModel cm) {
-		cm.addObserver(getTablePanel());
+		cm.addObserver(tablePanel);
 	}
 	
 	public TablePanel getTablePanel() {

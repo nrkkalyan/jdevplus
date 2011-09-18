@@ -12,9 +12,9 @@ import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
-import com.unitedcaterers.UCServer;
+import com.unitedcaterers.UBServer;
 import com.unitedcaterers.client.gui.EightDigitsTextField;
-import com.unitedcaterers.client.gui.UCClientPropertiesDialog;
+import com.unitedcaterers.client.gui.UBClientPropertiesDialog;
 import com.unitedcaterers.server.UCServerImpl;
 
 /**
@@ -25,25 +25,25 @@ import com.unitedcaterers.server.UCServerImpl;
  * to change, it updates the model and notifies the observers thus refreshing
  * the view.
  */
-public class ClientController implements ActionListener {
+public class UrlyBirdClientController implements ActionListener {
 	
 	private static Logger					logger			= Logger.getLogger("com.unitedcaterers.client.ClientController");
 	/**
 	 * The application frame.
 	 */
-	private ClientFrame						appFrame		= null;
+	private UrlyBirdClientFrame				mClientFrame	= null;
 	/**
 	 * The mainModel. It contains all the required data for the view. Methods of
 	 * this class modify it and notify observers.
 	 */
-	private ClientModel						mainModel		= null;
+	private ClientModel						mClientModel	= null;
 	/**
 	 * The current UCServerInterface. It can be changed dynamically. You can
 	 * have a option in Menu which allows the user to connect to remote or local
 	 * database. All you need to do is create an appropriate DBAdapter and set
 	 * it here.
 	 */
-	private UCServer						currentServer	= null;
+	private UBServer						mUBServer		= null;
 	/**
 	 * The current search parameters. It is used to refresh the table.
 	 */
@@ -53,11 +53,11 @@ public class ClientController implements ActionListener {
 	/**
 	 * Denotes whether the current server is a local (in process) server or not.
 	 */
-	private boolean							localflag		= false;
+	private final boolean					localflag;
 	/**
 	 * This dialog is used to capture connection properties.
 	 */
-	private final UCClientPropertiesDialog	pd;
+	private final UBClientPropertiesDialog	mUBClientPropertiesDialog;
 	
 	/**
 	 * This variable is required only because we have multiple implementations
@@ -80,34 +80,10 @@ public class ClientController implements ActionListener {
 	 * to this model and notifies it.
 	 * 
 	 */
-	public ClientController(ClientFrame clientFrame, String clientType) {
-		this.appFrame = clientFrame;
-		pd = new UCClientPropertiesDialog(appFrame);
-		this.localflag = "none".equals(clientType);
-		// mClientType = clientType;
-		this.appFrame.addWindowListener(new WindowAdapter() {
-			
-			// closes the server side component only if the client is a
-			// non-networked standalone client before exiting the JVM
-			@Override
-			public void windowClosing(WindowEvent we) {
-				if (currentServer != null && ClientController.this.localflag) {
-					// We know that in case of (non-networked) local mode,
-					// currentServer actually
-					// points to UCServerImpl object.
-					// In case of networked mode, we don't know the actually
-					// class of the object
-					// referred to by currentServer
-					((UCServerImpl) currentServer).close();
-				}
-				System.exit(0);
-			}
-		});
-		
-		connectToServer(localflag);
-		
-		mainModel = new ClientModel();
-		appFrame.setController(this);
+	public UrlyBirdClientController(UrlyBirdClientFrame clientFrame, String clientType) {
+		this.mClientFrame = clientFrame;
+		mClientModel = new ClientModel();
+		mClientFrame.setCPActionListener(this);
 		
 		// The following two lines use Observer - Observable pattern provided by
 		// Java
@@ -115,10 +91,35 @@ public class ClientController implements ActionListener {
 		// Note that appFrame itself does not implement java.util.Observer, it
 		// actually is a facade for two Observers - JTable and MessagePanel,
 		// which implement Observer
-		appFrame.setModel(mainModel);
+		mClientFrame.setModel(mClientModel);
 		
 		// This ensures that the view is updated after initialization.
-		mainModel.notifyObservers(new Boolean(true));
+		mClientModel.notifyObservers(new Boolean(true));
+		
+		mUBClientPropertiesDialog = new UBClientPropertiesDialog(mClientFrame);
+		this.localflag = "none".equals(clientType);
+		// mClientType = clientType;
+		this.mClientFrame.addWindowListener(new WindowAdapter() {
+			
+			// closes the server side component only if the client is a
+			// non-networked standalone client before exiting the JVM
+			@Override
+			public void windowClosing(WindowEvent we) {
+				if (mUBServer != null && localflag) {
+					// We know that in case of (non-networked) local mode,
+					// currentServer actually
+					// points to UCServerImpl object.
+					// In case of networked mode, we don't know the actually
+					// class of the object
+					// referred to by currentServer
+					((UCServerImpl) mUBServer).close();
+				}
+				System.exit(0);
+			}
+		});
+		
+		connectToServer(localflag);
+		
 	}
 	
 	/**
@@ -131,25 +132,23 @@ public class ClientController implements ActionListener {
 	 */
 	private void connectToServer(boolean pLocalflag) {
 		try {
-			pd.setLocal(pLocalflag);
-			Properties props = pd.loadProperties("unitedcaterers.properties");
+			mUBClientPropertiesDialog.setLocalFlag(pLocalflag);
+			Properties props = mUBClientPropertiesDialog.loadProperties("unitedcaterers.properties");
 			if (props == null) {
 				return; // should not happen
 			}
 			
 			if (pLocalflag) {
-				UCServer newServer = new UCServerImpl(props.getProperty("client.localdbfile"),
-						props.getProperty("client.localdbmagiccode"));
+				UBServer newServer = new UCServerImpl(props.getProperty("client.localdbfile"));
 				// close the existing server if any
-				if (this.currentServer != null && this.localflag) {
-					((UCServerImpl) this.currentServer).close();
+				if (this.mUBServer != null) {
+					((UCServerImpl) this.mUBServer).close();
 				}
-				this.currentServer = newServer;
-				this.localflag = true;
+				this.mUBServer = newServer;
 			} else {
 				String host = props.getProperty("client.serverhost");
 				String port = props.getProperty("client.serverport");
-				UCServer newServer = null;
+				UBServer newServer = null;
 				String name = "rmi://" + host + ":" + port + "/RemoteUCServer";
 				logger.info("ClientController - RMI version - connecting to " + name);
 				Remote remoteObj = Naming.lookup(name);
@@ -161,25 +160,25 @@ public class ClientController implements ActionListener {
 				// the remoteObj actually refers to UCServer interface.
 				// So you need to use the following line -
 				
-				newServer = (UCServer) remoteObj;
+				newServer = (UBServer) remoteObj;
 				
 				// close the currentServer only if it is a local one, in which
 				// case
 				// we know that it is an object of class UCServerImpl.
-				if (this.currentServer != null && this.localflag) {
-					((UCServerImpl) this.currentServer).close();
-				}
-				JOptionPane.showMessageDialog(appFrame, "Connected to RMI Server at " + name, "UC Client",
-						JOptionPane.INFORMATION_MESSAGE);
+				// if (this.mUBServer != null && this.localflag) {
+				// ((UCServerImpl) this.mUBServer).close();
 				// }
-				this.currentServer = newServer;
-				this.localflag = false;
+				// JOptionPane.showMessageDialog(mClientFrame,
+				// "Connected to RMI Server at " + name, "UC Client",
+				// JOptionPane.INFORMATION_MESSAGE);
+				// }
+				this.mUBServer = newServer;
+				// this.localflag = false;
 				
 			}
 			
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(appFrame, "Exception occured in connecting to the server: " + e.getMessage(),
-					"UC Message", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(mClientFrame, "Exception occured in connecting to the server: " + e.getMessage(), "UC Message", JOptionPane.ERROR_MESSAGE);
 			logger.log(Level.SEVERE, "Exception in connecting to server :" + e.getMessage(), e);
 		}
 	}
@@ -220,12 +219,12 @@ public class ClientController implements ActionListener {
 				}
 			}.start();
 		} else if ("DISCONNECT".equals(action)) {
-			if (this.currentServer != null && this.localflag) {
-				((UCServerImpl) this.currentServer).close();
+			if (this.mUBServer != null && this.localflag) {
+				((UCServerImpl) this.mUBServer).close();
 			}
 			// Note that there is nothing to do if the client is connected to a
 			// remote server.
-			currentServer = null;
+			mUBServer = null;
 		} else if ("CLEAR_CATERERS".equals(action)) {
 			// The following statements can also be refactored into a method
 			// doClearCaterers() as in cases further below.
@@ -234,13 +233,13 @@ public class ClientController implements ActionListener {
 												// final variable and reuse it
 												// instead instantiating a new
 												// String array everytime.
-			mainModel.setDisplayRows(data);
-			mainModel.notifyObservers();
+			mClientModel.setDisplayRows(data);
+			mClientModel.notifyObservers();
 			// mainModel.getMessageModel().updateModel("Please use File Menu to search for caterers.");
 			// mainModel.getMessageModel().notifyObservers();
 			
 		} else if ("VIEWALL_CATERERS".equals(action)) {
-			doViewAllCaterers();
+			doShowAllRooms();
 		} else if (action.equals("SEARCH_CATERERS")) {
 			doSearchCaterers();
 		} else if (action.startsWith("SEARCH_CATERERS_WITH_PARAMS")) {
@@ -259,12 +258,9 @@ public class ClientController implements ActionListener {
 			bookRoom(action); // ActionCommand for this would be like:
 								// BOOK_CATERER:12
 		} else if ("APP_HELP".equals(action)) {
-			JOptionPane.showMessageDialog(appFrame,
-					"To learn how to use the application please see \\docs\\userguide.txt ", "Help",
-					JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(mClientFrame, "To learn how to use the application please see \\docs\\userguide.txt ", "Help", JOptionPane.INFORMATION_MESSAGE);
 		} else if ("ABOUT".equals(action)) {
-			JOptionPane.showMessageDialog(appFrame, "Copyright, Enthuware Inc.", "About",
-					JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(mClientFrame, "Copyright, Enthuware Inc.", "About", JOptionPane.INFORMATION_MESSAGE);
 		}
 		
 	}
@@ -281,40 +277,36 @@ public class ClientController implements ActionListener {
 	 *            it.
 	 */
 	public void bookRoom(String action) {
-		if (currentServer == null) {
-			JOptionPane.showMessageDialog(appFrame, "Please connect to a server before booking.", "Book Caterer",
-					JOptionPane.INFORMATION_MESSAGE);
+		if (mUBServer == null) {
+			JOptionPane.showMessageDialog(mClientFrame, "Please connect to a server before booking.", "Book Caterer", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		int x = action.indexOf(":");
 		String[] data = null;
 		if (x != -1 && x < action.length()) {
 			int index = Integer.parseInt(action.substring(x + 1).trim());
-			data = mainModel.getDisplayRows()[index];
+			data = mClientModel.getDisplayRows()[index];
 		} else {
-			int ind = appFrame.getTablePanel().getSelectedIndex();
+			int ind = mClientFrame.getTablePanel().getSelectedIndex();
 			if (ind == -1) {
-				JOptionPane.showMessageDialog(appFrame, "Please select a caterer from the list of caterers first.",
-						"Book Caterer", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(mClientFrame, "Please select a caterer from the list of caterers first.", "Book Caterer", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
-			data = mainModel.getDisplayRows()[ind];
+			data = mClientModel.getDisplayRows()[ind];
 		}
 		
 		if (data[7] != null && data[7].trim().length() > 0) {
-			JOptionPane.showMessageDialog(appFrame, "Room is already booked.", "Book Caterer",
-					JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(mClientFrame, "Room is already booked.", "Book Caterer", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		
 		EightDigitsTextField customerIDTextField = new EightDigitsTextField();
 		// KALYAN: Change to Booking D
 		Object[] arrayMessage = { "Enter customer ID (8 digits only):", customerIDTextField };
-		int value = JOptionPane.showConfirmDialog(appFrame, arrayMessage, "Input", JOptionPane.OK_CANCEL_OPTION);
+		int value = JOptionPane.showConfirmDialog(mClientFrame, arrayMessage, "Input", JOptionPane.OK_CANCEL_OPTION);
 		if (value == 0) {
 			if (!customerIDTextField.isEditValid()) {
-				JOptionPane.showMessageDialog(appFrame, "Invalid Customer id.(8 digits) ", "Book Caterer",
-						JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(mClientFrame, "Invalid Customer id.(8 digits) ", "Book Caterer", JOptionPane.WARNING_MESSAGE);
 				return;
 			}
 			String customerid = customerIDTextField.getText();
@@ -323,17 +315,15 @@ public class ClientController implements ActionListener {
 			// characters
 			try {
 				
-				boolean status = currentServer.bookCaterer(customerid, data);
+				boolean status = mUBServer.bookCaterer(customerid, data);
 				if (status) {
 					refreshView(currentQuery, currentHotelName, currentLocation);
 				} else {
-					JOptionPane.showMessageDialog(appFrame, "Sorry, Unable to book this caterer.", "Book Caterer",
-							JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(mClientFrame, "Sorry, Unable to book this caterer.", "Book Caterer", JOptionPane.INFORMATION_MESSAGE);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				JOptionPane.showMessageDialog(appFrame, "Unable to book the caterer. " + e.getMessage(),
-						"Book Caterer", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(mClientFrame, "Unable to book the caterer. " + e.getMessage(), "Book Caterer", JOptionPane.INFORMATION_MESSAGE);
 				refreshView(currentQuery, currentHotelName, currentLocation);
 			}
 			
@@ -349,23 +339,22 @@ public class ClientController implements ActionListener {
 		// "Do you really want to exit?", new String[]{"Yes", "No"}, new
 		// int[]{1, 2});
 		// md.setSize(200, 100);
-		int choice = JOptionPane.showConfirmDialog(appFrame, "Do you really want to exit?", "Exit System",
-				JOptionPane.YES_NO_OPTION);
+		int choice = JOptionPane.showConfirmDialog(mClientFrame, "Do you really want to exit?", "Exit System", JOptionPane.YES_NO_OPTION);
 		if (choice == JOptionPane.YES_OPTION) {
-			if (currentServer != null && ClientController.this.localflag) { // this
-																			// is
-																			// done
-																			// so
-																			// that
-																			// any
-																			// open
-																			// file
-																			// is
-																			// closed
-																			// properly
-																			// before
-																			// exiting
-				((UCServerImpl) currentServer).close();
+			if (mUBServer != null && UrlyBirdClientController.this.localflag) { // this
+				// is
+				// done
+				// so
+				// that
+				// any
+				// open
+				// file
+				// is
+				// closed
+				// properly
+				// before
+				// exiting
+				((UCServerImpl) mUBServer).close();
 			}
 			// Note that there is nothing to do if it is connected to a remote
 			// client except exiting.
@@ -380,8 +369,7 @@ public class ClientController implements ActionListener {
 	 * thereby updating the view frame.
 	 */
 	public void doSearchCaterers() {
-		Object obj = JOptionPane.showInputDialog(appFrame,
-				"How many number of guests do you want to cater to?(Click Cancel if no preference)", "Max Guests",
+		Object obj = JOptionPane.showInputDialog(mClientFrame, "How many number of guests do you want to cater to?(Click Cancel if no preference)", "Max Guests",
 				JOptionPane.INFORMATION_MESSAGE, null, null, "50");
 		String hotelName = null;
 		if (obj != null) {
@@ -394,8 +382,8 @@ public class ClientController implements ActionListener {
 		}
 		
 		String location = null;
-		obj = JOptionPane.showInputDialog(appFrame, "Which location are you in?(Click Cancel if no preference)",
-				"View Routes", JOptionPane.INFORMATION_MESSAGE, null, null, "Iselin");
+		obj = JOptionPane.showInputDialog(mClientFrame, "Which location are you in?(Click Cancel if no preference)", "View Routes", JOptionPane.INFORMATION_MESSAGE, null, null,
+				"Iselin");
 		if (obj != null) {
 			location = obj.toString().trim();
 			currentLocation = location;
@@ -422,14 +410,13 @@ public class ClientController implements ActionListener {
 				refreshView(currentQuery, "", "");
 			}
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(appFrame, "Exception occured in processing request : " + e.getMessage(),
-					"UC Message", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(mClientFrame, "Exception occured in processing request : " + e.getMessage(), "UC Message", JOptionPane.ERROR_MESSAGE);
 			logger.log(Level.WARNING, "Exception in processing request.", e);
 		}
 		
 	}
 	
-	public void doViewAllCaterers() {
+	public void doShowAllRooms() {
 		currentQuery = "viewall";
 		refreshView(currentQuery, null, null);
 	}
@@ -442,29 +429,27 @@ public class ClientController implements ActionListener {
 	 * @param location
 	 */
 	private void refreshView(String query, String hotelName, String location) {
-		if (currentServer == null) {
-			JOptionPane.showMessageDialog(appFrame, "Please connect to a server first. ", "Unconnected",
-					JOptionPane.INFORMATION_MESSAGE);
+		if (mUBServer == null) {
+			JOptionPane.showMessageDialog(mClientFrame, "Please connect to a server first. ", "Unconnected", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		try {
 			String[][] data = new String[0][0];
 			if ("viewall".equals(query)) {
-				data = currentServer.getAllCaterers();
+				data = mUBServer.getAllCaterers();
 				
 			} else if ("viewbyhotelname".equals(query)) {
-				data = currentServer.searchCaterersByHotelName(hotelName);
+				data = mUBServer.searchCaterersByHotelName(hotelName);
 			} else if ("viewbylocation".equals(query)) {
-				data = currentServer.searchCaterersByLocation(location);
+				data = mUBServer.searchCaterersByLocation(location);
 			} else if ("viewbyhotelnameandlocation".equals(query)) {
-				data = currentServer.searchCaterersByHotelNameAndLocation(hotelName, location);
+				data = mUBServer.searchCaterersByHotelNameAndLocation(hotelName, location);
 			}
-			mainModel.setDisplayRows(data);
-			mainModel.notifyObservers();
+			mClientModel.setDisplayRows(data);
+			mClientModel.notifyObservers();
 			// mainModel.getMessageModel().notifyObservers();
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(appFrame, "Exception occured in processing request : " + e.getMessage(),
-					"UC Message", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(mClientFrame, "Exception occured in processing request : " + e.getMessage(), "UC Message", JOptionPane.ERROR_MESSAGE);
 			logger.log(Level.WARNING, "Exception in processing request", e);
 		}
 		

@@ -24,5 +24,5 @@ public interface UCServerFactory extends java.rmi.Remote {
 	 * cares about UCServer (or Database if you are exposing the lower level
 	 * functionality on client side).
 	 */
-	UCServer getClientProxy() throws RemoteException, UCException;
+	UBServer getClientProxy() throws RemoteException, UCException;
 }

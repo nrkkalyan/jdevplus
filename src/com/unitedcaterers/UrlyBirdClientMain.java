@@ -1,7 +1,7 @@
 package com.unitedcaterers;
 
-import com.unitedcaterers.client.ClientController;
-import com.unitedcaterers.client.ClientFrame;
+import com.unitedcaterers.client.UrlyBirdClientController;
+import com.unitedcaterers.client.UrlyBirdClientFrame;
 
 /**
  * This class starts the client side of the application. In a nutshell, it
@@ -11,7 +11,7 @@ import com.unitedcaterers.client.ClientFrame;
  * the Controller. ClientModel is not instantiated in this class because it is
  * instantiated by ClientController.
  */
-public class ClientMain {
+public class UrlyBirdClientMain {
 	
 	/**
 	 * Starts up the client.
@@ -22,12 +22,12 @@ public class ClientMain {
 	 *            "none" is given, a local database is used directly.
 	 */
 	public static void startup(String clienttype) {
-		ClientFrame cf = new ClientFrame();
-		ClientController cc = new ClientController(cf, clienttype);
+		UrlyBirdClientFrame cf = new UrlyBirdClientFrame();
+		UrlyBirdClientController cc = new UrlyBirdClientController(cf, clienttype);
 		cf.setSize(700, 700);
 		cf.setLocationRelativeTo(null); // makes sure that the frame is centered
 		cf.setVisible(true);
-		cc.doViewAllCaterers();
+		cc.doShowAllRooms();
 	}
 	
 }

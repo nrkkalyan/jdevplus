@@ -5,7 +5,7 @@ import java.rmi.RemoteException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.unitedcaterers.UCServer;
+import com.unitedcaterers.UBServer;
 import com.unitedcaterers.db.DB;
 import com.unitedcaterers.db.Data;
 import com.unitedcaterers.db.RecordNotFoundException;
@@ -34,14 +34,14 @@ import com.unitedcaterers.util.UCException;
  * exceptions.
  */
 
-public class UCServerImpl implements UCServer {
+public class UCServerImpl implements UBServer {
 	protected static Logger	logger	= Logger.getLogger("com.unitedcaterers.server.UCServer");
 	private DB				db;
 	
 	// a boolean flag to determine whether there is a valid db or not.
-	public UCServerImpl(String dbfilename, String magiccode) throws RemoteException, UCException {
+	public UCServerImpl(String dbfilename) throws RemoteException, UCException {
 		try {
-			db = new Data(dbfilename, magiccode);
+			db = new Data(dbfilename);
 		} catch (IOException ioe) {
 			throw new UCException("Unable to connect to the database. : " + ioe.getMessage());
 		}
@@ -68,8 +68,7 @@ public class UCServerImpl implements UCServer {
 	}
 	
 	@Override
-	public String[][] searchCaterersByHotelNameAndLocation(String hotelName, String location) throws RemoteException,
-			UCException {
+	public String[][] searchCaterersByHotelNameAndLocation(String hotelName, String location) throws RemoteException, UCException {
 		if (db == null) {
 			throw new UCException("Connection to the database has been closed. Must restart/recreate the server.");
 		}

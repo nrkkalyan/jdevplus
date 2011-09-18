@@ -16,7 +16,7 @@ public class DBLockTester extends Thread {
 	static {
 		try {
 			String filePath = "c:\\temp\\ucdb.db";
-			data = new Data(filePath, "UCDB");
+			data = new Data(filePath);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -90,8 +90,7 @@ public class DBLockTester extends Thread {
 				
 				data.update(randomRecNo, record, lockkey);
 				
-				logger.fine("Thread " + getId() + " trying to unlock record #" + randomRecNo
-						+ " on UpdatingRandomRecordThread");
+				logger.fine("Thread " + getId() + " trying to unlock record #" + randomRecNo + " on UpdatingRandomRecordThread");
 			} catch (Exception e) {
 				e.printStackTrace();
 			} finally {

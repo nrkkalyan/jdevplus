@@ -21,18 +21,18 @@ import com.unitedcaterers.client.ClientModel;
  */
 public class TablePanel extends JPanel implements Observer {
 	
-	JTable						recordJTable			= null;
-	CDModel						cdModel					= null;
-	ClientModel					mainModel				= null;
+	DataModel					mTableDataModel			= new DataModel();
+	JTable						recordJTable			= new JTable(mTableDataModel);
+	ClientModel					mClientModel			= null;
 	private static final int	PREFERRED_JTABLE_WIDTH	= 640;
 	private static final int	PREFERRED_JTABLE_HEIGHT	= 480;
 	
 	/**
 	 * This inner class implements the TableModel used by JTable.
 	 */
-	private class CDModel extends AbstractTableModel {
+	private class DataModel extends AbstractTableModel {
 		
-		String[]	colNames	= new String[0];	// Column names will come
+		String[]	mColumnNames	= new String[0];	// Column names will come
 													// from the model. The
 													// following line was used
 													// for testing purposes only
@@ -42,24 +42,24 @@ public class TablePanel extends JPanel implements Observer {
 		// "Price", "Booking Status"};
 		String[][]	displayRows	= new String[0][0];
 		
-		public CDModel() {
-			if (mainModel != null) {
-				displayRows = mainModel.getDisplayRows();
+		public DataModel() {
+			if (mClientModel != null) {
+				displayRows = mClientModel.getDisplayRows();
 			} else {
 				displayRows = new String[0][0];
 			}
 		}
 		
 		public void refresh() {
-			if (mainModel != null) {
-				displayRows = mainModel.getDisplayRows();
-				colNames = mainModel.getColumns();
+			if (mClientModel != null) {
+				displayRows = mClientModel.getDisplayRows();
+				mColumnNames = mClientModel.getColumns();
 			}
 		}
 		
 		@Override
 		public int getColumnCount() {
-			return colNames.length;
+			return mColumnNames.length;
 		}
 		
 		@Override
@@ -72,7 +72,7 @@ public class TablePanel extends JPanel implements Observer {
 		
 		@Override
 		public String getColumnName(int col) {
-			return colNames[col];
+			return mColumnNames[col];
 		}
 		
 		@Override
@@ -89,16 +89,6 @@ public class TablePanel extends JPanel implements Observer {
 	}
 	
 	public TablePanel() {
-		super();
-		
-		cdModel = new CDModel();
-		
-		recordJTable = new JTable(cdModel);
-		
-		initGUI();
-	}
-	
-	private void initGUI() {
 		
 		this.setLayout(new BorderLayout());
 		recordJTable.setPreferredScrollableViewportSize(new Dimension(PREFERRED_JTABLE_WIDTH, PREFERRED_JTABLE_HEIGHT));
@@ -109,7 +99,6 @@ public class TablePanel extends JPanel implements Observer {
 		JScrollPane jsp = new JScrollPane(recordJTable);
 		
 		add(BorderLayout.CENTER, jsp);
-		
 	}
 	
 	public static void main(String[] args) {
@@ -138,7 +127,7 @@ public class TablePanel extends JPanel implements Observer {
 	public void update(Observable model, Object obj) {
 		
 		// System.out.println("in update of tabePanel");
-		this.mainModel = (ClientModel) model;
+		this.mClientModel = (ClientModel) model;
 		if (obj instanceof Boolean) {
 			updateTableView(((Boolean) obj).booleanValue());
 		} else {
@@ -154,14 +143,14 @@ public class TablePanel extends JPanel implements Observer {
 	 *        refreshed.
 	 */
 	private void updateTableView(boolean totalUpdate) {
-		cdModel.refresh();
+		mTableDataModel.refresh();
 		if (totalUpdate) {
-			cdModel.fireTableStructureChanged();
+			mTableDataModel.fireTableStructureChanged();
 			this.revalidate();
 			recordJTable.revalidate();
 			recordJTable.repaint();
 		} else {
-			cdModel.fireTableDataChanged();
+			mTableDataModel.fireTableDataChanged();
 		}
 	}
 	

@@ -30,16 +30,13 @@ public class RMIServerMain {
 			try {
 				// This starts up the registry at port 1099 on the local
 				// machine.
-				java.rmi.registry.Registry regs = java.rmi.registry.LocateRegistry.createRegistry(Integer
-						.parseInt(props.getProperty("server.port")));
+				java.rmi.registry.Registry regs = java.rmi.registry.LocateRegistry.createRegistry(Integer.parseInt(props.getProperty("server.port")));
 				logger.fine("RMI registry created on port :" + props.getProperty("server.port"));
 				name = "rmi://localhost:" + props.getProperty("server.port").trim() + "/RemoteUCServer";
-				logger.fine("Creating RMIUCServer with arguments: " + props.getProperty("server.dbfile") + " , "
-						+ props.getProperty("server.dbmagiccode") + "  by name : " + name);
+				logger.fine("Creating RMIUCServer with arguments: " + props.getProperty("server.dbfile") + " , " + props.getProperty("server.dbmagiccode") + "  by name : " + name);
 				
 				// Create the remote object
-				RMIUCServerImpl theserver = new RMIUCServerImpl(props.getProperty("server.dbfile"),
-						props.getProperty("server.dbmagiccode"));
+				RMIUCServerImpl theserver = new RMIUCServerImpl(props.getProperty("server.dbfile"));
 				
 				// Bind the remote object
 				Naming.rebind(name, theserver);
@@ -49,9 +46,8 @@ public class RMIServerMain {
 			} catch (Exception e) {
 				System.out.println("RMIUCServer got exception while instantiation : " + e.getMessage());
 				e.printStackTrace();
-				int choice = JOptionPane.showConfirmDialog(null, "Unable to startup the server because of exception : "
-						+ e.getMessage() + ". Do you want to try again?", "United Caterers App",
-						JOptionPane.YES_NO_OPTION);
+				int choice = JOptionPane.showConfirmDialog(null, "Unable to startup the server because of exception : " + e.getMessage() + ". Do you want to try again?",
+						"United Caterers App", JOptionPane.YES_NO_OPTION);
 				retryflag = (choice == JOptionPane.YES_OPTION);
 				if (!retryflag)
 					System.exit(0);

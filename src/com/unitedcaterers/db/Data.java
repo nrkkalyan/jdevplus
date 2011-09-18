@@ -64,7 +64,7 @@ public class Data implements DB {
 	 *             not match with the magiccode stored in the dbfile.
 	 * @throws SecurityException
 	 */
-	public Data(String dbfilename, String magiccode2) throws IOException, UCException {
+	public Data(String dbfilename) throws IOException, UCException {
 		FileInputStream fis = new FileInputStream(dbfilename);
 		DataInputStream dis = new DataInputStream(fis);
 		
@@ -167,8 +167,7 @@ public class Data implements DB {
 	 *            The record should have been locked with this key.
 	 */
 	@Override
-	public synchronized void update(int recNo, String[] data, long lockkey) throws RecordNotFoundException,
-			SecurityException {
+	public synchronized void update(int recNo, String[] data, long lockkey) throws RecordNotFoundException, SecurityException {
 		if (recNo < 0) {
 			throw new RecordNotFoundException("No such record : " + recNo);
 		}
@@ -457,8 +456,7 @@ public class Data implements DB {
 		private synchronized long lockDB() {
 			while (dblocked || locks.size() != 0) {
 				try {
-					logger.fine("   Thread #" + Thread.currentThread().getId()
-							+ " waiting for DB Lock... dblocked flag = " + dblocked + " locker size = " + locks.size());
+					logger.fine("   Thread #" + Thread.currentThread().getId() + " waiting for DB Lock... dblocked flag = " + dblocked + " locker size = " + locks.size());
 					wait();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -494,8 +492,7 @@ public class Data implements DB {
 			} else {
 				while (locks.get(recordNo) != null || dblocked) {
 					try {
-						logger.fine("   Thread #" + Thread.currentThread().getId() + " entering wait for Record "
-								+ recordNo);
+						logger.fine("   Thread #" + Thread.currentThread().getId() + " entering wait for Record " + recordNo);
 						wait();
 					} catch (Exception e) {
 						logger.warning("Some Exception in waiting for record :" + recordNo);

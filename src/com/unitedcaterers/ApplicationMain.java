@@ -14,9 +14,9 @@ public class ApplicationMain {
 	public static void main(String[] args) throws Exception {
 		
 		if (args.length == 0) {
-			ClientMain.startup("rmi");
+			UrlyBirdClientMain.startup("rmi");
 		} else if ("alone".equalsIgnoreCase(args[0])) {
-			ClientMain.startup("none");
+			UrlyBirdClientMain.startup("none");
 		} else if ("server".equalsIgnoreCase(args[0])) {
 			RMIServerMain.startup();
 		} else {
