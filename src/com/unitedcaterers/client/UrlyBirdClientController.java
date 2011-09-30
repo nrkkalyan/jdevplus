@@ -194,7 +194,8 @@ public class UrlyBirdClientController implements ActionListener {
 	 */
 	@Override
 	public void actionPerformed(ActionEvent ae) {
-		String action = ae.getActionCommand(); // ActionCommand is just a string
+		String action = ae.getActionCommand(); // ActionCommand is hjust a
+												// string
 												// that we use to determine the
 												// intention of the user. Its
 												// value is set in ControlPanel
