@@ -118,7 +118,7 @@ public class UrlyBirdClientController implements ActionListener {
 			}
 		});
 		
-		connectToServer(localflag);
+		connect(localflag);
 		
 	}
 	
@@ -130,7 +130,7 @@ public class UrlyBirdClientController implements ActionListener {
 	 * @param pLocalflag
 	 *            If true, it means it is a standalone client
 	 */
-	private void connectToServer(boolean pLocalflag) {
+	private void connect(boolean pLocalflag) {
 		try {
 			mUBClientPropertiesDialog.setLocalFlag(pLocalflag);
 			Properties props = mUBClientPropertiesDialog.loadProperties("suncertify.properties");
@@ -208,7 +208,7 @@ public class UrlyBirdClientController implements ActionListener {
 				
 				@Override
 				public void run() {
-					connectToServer(true);
+					connect(true);
 				}
 			}.start();
 		} else if ("CONNECT_REMOTE".equals(action)) {
@@ -216,53 +216,61 @@ public class UrlyBirdClientController implements ActionListener {
 				
 				@Override
 				public void run() {
-					connectToServer(false);
+					connect(false);
 				}
 			}.start();
-		} else if ("DISCONNECT".equals(action)) {
-			if (this.mUBServer != null && this.localflag) {
-				((UCServerImpl) this.mUBServer).close();
-			}
-			// Note that there is nothing to do if the client is connected to a
-			// remote server.
-			mUBServer = null;
-		} /*
-		 * else if ("CLEAR_CATERERS".equals(action)) { // The following
-		 * statements can also be refactored into a method // doClearCaterers()
-		 * as in cases further below. String[][] data = new String[0][0]; //
-		 * This is done for simplicity. // You can also make it a static //
-		 * final variable and reuse it // instead instantiating a new // String
-		 * array everytime. mClientModel.setDisplayRows(data);
+		}
+		/*
+		 * else if ("DISCONNECT".equals(action)) { if (this.mUBServer != null &&
+		 * this.localflag) { ((UCServerImpl) this.mUBServer).close(); } // Note
+		 * that there is nothing to do if the client is connected to a // remote
+		 * server. mUBServer = null; } else if ("CLEAR_CATERERS".equals(action))
+		 * { // The following statements can also be refactored into a method //
+		 * doClearCaterers() as in cases further below. String[][] data = new
+		 * String[0][0]; // This is done for simplicity. // You can also make it
+		 * a static // final variable and reuse it // instead instantiating a
+		 * new // String array everytime. mClientModel.setDisplayRows(data);
 		 * mClientModel.notifyObservers(); //
 		 * mainModel.getMessageModel().updateModel
 		 * ("Please use File Menu to search for caterers."); //
 		 * mainModel.getMessageModel().notifyObservers();
 		 * 
-		 * }
-		 */else if ("VIEWALL_CATERERS".equals(action)) {
-			doShowAllRooms();
-		} else if (action.equals("SEARCH_CATERERS")) {
-			doSearchCaterers();
+		 * } else if (action.equals("SEARCH_CATERERS")) { searchCaterers(); }
+		 */
+		else if ("VIEWALL_CATERERS".equals(action)) {
+			showAllRooms();
 		} else if (action.startsWith("SEARCH_CATERERS_WITH_PARAMS")) {
 			int i1 = action.indexOf(":");
-			int i2 = action.indexOf(",");
-			String cap = null;
-			if (i2 > i1 + 1) {
-				cap = action.substring(i1 + 1, i2);
-			}
+			// int i2 = action.indexOf(",");
+			// String name = null;
+			// if (i2 > i1 + 1) {
+			// name = action.substring(i1 + 1, i2);
+			// }
+			// String loc = null;
+			// if (action.length() > i2 + 1) {
+			// loc = action.substring(i2 + 1);
+			// }
+			
+			String[] aSplit = action.substring(i1 + 1).split(",");
+			String name = aSplit[0];
 			String loc = null;
-			if (action.length() > i2 + 1) {
-				loc = action.substring(i2 + 1);
+			if (aSplit.length > 1) {
+				loc = aSplit[1];
 			}
-			doSearchCaterers(cap, loc);
+			doSearchCaterers(name, loc);
 		} else if (action.indexOf("BOOK_CATERER") != -1) {
 			bookRoom(action); // ActionCommand for this would be like:
 								// BOOK_CATERER:12
-		} else if ("APP_HELP".equals(action)) {
-			JOptionPane.showMessageDialog(mClientFrame, "To learn how to use the application please see \\docs\\userguide.txt ", "Help", JOptionPane.INFORMATION_MESSAGE);
-		} else if ("ABOUT".equals(action)) {
-			JOptionPane.showMessageDialog(mClientFrame, "Copyright, Enthuware Inc.", "About", JOptionPane.INFORMATION_MESSAGE);
-		}
+		} /*
+		 * else if ("APP_HELP".equals(action)) {
+		 * JOptionPane.showMessageDialog(mClientFrame,
+		 * "To learn how to use the application please see \\docs\\userguide.txt "
+		 * , "Help", JOptionPane.INFORMATION_MESSAGE); } else if
+		 * ("ABOUT".equals(action)) {
+		 * JOptionPane.showMessageDialog(mClientFrame,
+		 * "Copyright, Enthuware Inc.", "About",
+		 * JOptionPane.INFORMATION_MESSAGE); }
+		 */
 		
 	}
 	
@@ -369,7 +377,7 @@ public class UrlyBirdClientController implements ActionListener {
 	 * calls refreshView() method that updates the model and notifies observers
 	 * thereby updating the view frame.
 	 */
-	public void doSearchCaterers() {
+	public void searchCaterers() {
 		Object obj = JOptionPane.showInputDialog(mClientFrame, "How many number of guests do you want to cater to?(Click Cancel if no preference)", "Max Guests",
 				JOptionPane.INFORMATION_MESSAGE, null, null, "50");
 		String hotelName = null;
@@ -397,10 +405,10 @@ public class UrlyBirdClientController implements ActionListener {
 	private void doSearchCaterers(String hotelName, String location) {
 		try {
 			
-			if (location != null && hotelName != null && !hotelName.trim().isEmpty()) {
+			if (location != null && hotelName != null && !hotelName.trim().isEmpty() && !location.trim().isEmpty()) {
 				currentQuery = "viewbyhotelnameandlocation";
 				refreshView(currentQuery, hotelName, location);
-			} else if (location != null) {
+			} else if (location != null && !location.trim().isEmpty()) {
 				currentQuery = "viewbylocation";
 				refreshView(currentQuery, "", location);
 			} else if (hotelName != null && !hotelName.trim().isEmpty()) {
@@ -417,7 +425,7 @@ public class UrlyBirdClientController implements ActionListener {
 		
 	}
 	
-	public void doShowAllRooms() {
+	public void showAllRooms() {
 		currentQuery = "viewall";
 		refreshView(currentQuery, null, null);
 	}

@@ -27,7 +27,7 @@ public class UrlyBirdClientMain {
 		cf.setSize(700, 700);
 		cf.setLocationRelativeTo(null); // makes sure that the frame is centered
 		cf.setVisible(true);
-		cc.doShowAllRooms();
+		cc.showAllRooms();
 	}
 	
 }

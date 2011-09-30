@@ -310,7 +310,7 @@ public class Data implements DB {
 					if (criteria[i] == null) {
 						continue;
 					}
-					if (!fielddata[i].matches(criteria[i])) {
+					if (!fielddata[i].trim().matches(criteria[i])) {
 						match = false;
 						break;
 					}
