@@ -14,8 +14,8 @@ import javax.swing.JOptionPane;
 
 import com.unitedcaterers.UBServer;
 import com.unitedcaterers.client.gui.EightDigitsTextField;
-import com.unitedcaterers.client.gui.UBClientPropertiesDialog;
 import com.unitedcaterers.server.UCServerImpl;
+import com.unitedcaterers.util.PropertiesDialog;
 
 /**
  * This class is the controller of the client application. All the user actions
@@ -27,37 +27,37 @@ import com.unitedcaterers.server.UCServerImpl;
  */
 public class UrlyBirdClientController implements ActionListener {
 	
-	private static Logger					logger			= Logger.getLogger("com.unitedcaterers.client.ClientController");
+	private static Logger			logger			= Logger.getLogger("com.unitedcaterers.client.ClientController");
 	/**
 	 * The application frame.
 	 */
-	private UrlyBirdClientFrame				mClientFrame	= null;
+	private UrlyBirdClientFrame		mClientFrame	= null;
 	/**
 	 * The mainModel. It contains all the required data for the view. Methods of
 	 * this class modify it and notify observers.
 	 */
-	private ClientModel						mClientModel	= null;
+	private ClientModel				mClientModel	= null;
 	/**
 	 * The current UCServerInterface. It can be changed dynamically. You can
 	 * have a option in Menu which allows the user to connect to remote or local
 	 * database. All you need to do is create an appropriate DBAdapter and set
 	 * it here.
 	 */
-	private UBServer						mUBServer		= null;
+	private UBServer				mUBServer		= null;
 	/**
 	 * The current search parameters. It is used to refresh the table.
 	 */
-	private String							currentQuery	= "";
-	private String							currentHotelName;
-	private String							currentLocation;
+	private String					currentQuery	= "";
+	private String					currentHotelName;
+	private String					currentLocation;
 	/**
 	 * Denotes whether the current server is a local (in process) server or not.
 	 */
-	private final boolean					localflag;
+	private final boolean			localflag;
 	/**
 	 * This dialog is used to capture connection properties.
 	 */
-	private final UBClientPropertiesDialog	mUBClientPropertiesDialog;
+	private final PropertiesDialog	mUBClientPropertiesDialog;
 	
 	/**
 	 * This variable is required only because we have multiple implementations
@@ -96,7 +96,7 @@ public class UrlyBirdClientController implements ActionListener {
 		// This ensures that the view is updated after initialization.
 		mClientModel.notifyObservers(new Boolean(true));
 		
-		mUBClientPropertiesDialog = new UBClientPropertiesDialog(mClientFrame);
+		mUBClientPropertiesDialog = new PropertiesDialog(mClientFrame, false);
 		this.localflag = "none".equals(clientType);
 		// mClientType = clientType;
 		this.mClientFrame.addWindowListener(new WindowAdapter() {
@@ -133,23 +133,23 @@ public class UrlyBirdClientController implements ActionListener {
 	private void connectToServer(boolean pLocalflag) {
 		try {
 			mUBClientPropertiesDialog.setLocalFlag(pLocalflag);
-			Properties props = mUBClientPropertiesDialog.loadProperties("unitedcaterers.properties");
+			Properties props = mUBClientPropertiesDialog.loadProperties("suncertify.properties");
 			if (props == null) {
 				return; // should not happen
 			}
 			
 			if (pLocalflag) {
-				UBServer newServer = new UCServerImpl(props.getProperty("client.localdbfile"));
+				UBServer newServer = new UCServerImpl(props.getProperty("dbfile"));
 				// close the existing server if any
 				if (this.mUBServer != null) {
 					((UCServerImpl) this.mUBServer).close();
 				}
 				this.mUBServer = newServer;
 			} else {
-				String host = props.getProperty("client.serverhost");
-				String port = props.getProperty("client.serverport");
+				String host = props.getProperty("serverhost");
+				String port = props.getProperty("serverport");
 				UBServer newServer = null;
-				String name = "rmi://" + host + ":" + port + "/RemoteUCServer";
+				String name = "rmi://" + host + ":" + port + "/RemoteUBServer";
 				logger.info("ClientController - RMI version - connecting to " + name);
 				Remote remoteObj = Naming.lookup(name);
 				
@@ -165,9 +165,9 @@ public class UrlyBirdClientController implements ActionListener {
 				// close the currentServer only if it is a local one, in which
 				// case
 				// we know that it is an object of class UCServerImpl.
-				// if (this.mUBServer != null && this.localflag) {
-				// ((UCServerImpl) this.mUBServer).close();
-				// }
+				if (this.mUBServer != null && this.localflag) {
+					((UCServerImpl) this.mUBServer).close();
+				}
 				// JOptionPane.showMessageDialog(mClientFrame,
 				// "Connected to RMI Server at " + name, "UC Client",
 				// JOptionPane.INFORMATION_MESSAGE);
@@ -225,20 +225,20 @@ public class UrlyBirdClientController implements ActionListener {
 			// Note that there is nothing to do if the client is connected to a
 			// remote server.
 			mUBServer = null;
-		} else if ("CLEAR_CATERERS".equals(action)) {
-			// The following statements can also be refactored into a method
-			// doClearCaterers() as in cases further below.
-			String[][] data = new String[0][0]; // This is done for simplicity.
-												// You can also make it a static
-												// final variable and reuse it
-												// instead instantiating a new
-												// String array everytime.
-			mClientModel.setDisplayRows(data);
-			mClientModel.notifyObservers();
-			// mainModel.getMessageModel().updateModel("Please use File Menu to search for caterers.");
-			// mainModel.getMessageModel().notifyObservers();
-			
-		} else if ("VIEWALL_CATERERS".equals(action)) {
+		} /*
+		 * else if ("CLEAR_CATERERS".equals(action)) { // The following
+		 * statements can also be refactored into a method // doClearCaterers()
+		 * as in cases further below. String[][] data = new String[0][0]; //
+		 * This is done for simplicity. // You can also make it a static //
+		 * final variable and reuse it // instead instantiating a new // String
+		 * array everytime. mClientModel.setDisplayRows(data);
+		 * mClientModel.notifyObservers(); //
+		 * mainModel.getMessageModel().updateModel
+		 * ("Please use File Menu to search for caterers."); //
+		 * mainModel.getMessageModel().notifyObservers();
+		 * 
+		 * }
+		 */else if ("VIEWALL_CATERERS".equals(action)) {
 			doShowAllRooms();
 		} else if (action.equals("SEARCH_CATERERS")) {
 			doSearchCaterers();

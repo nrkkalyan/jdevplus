@@ -1,16 +1,28 @@
 package com.unitedcaterers.util;
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.WindowConstants;
+import javax.swing.filechooser.FileFilter;
 
 /**
  * This is a helper class that implements most of the logic to capture the
@@ -25,79 +37,178 @@ import javax.swing.JFrame;
  * @author Enthuware
  * @version 1.0
  */
-public abstract class PropertiesDialog extends JDialog {
+public class PropertiesDialog extends JDialog implements ActionListener {
 	
-	protected static Logger	logger	= Logger.getLogger("com.unitedcaterers.db.PropertiesDialog");
 	/**
-	 * Used to check whether the user clicked OK, Cancel. Method showDialog()
-	 * returns this value when the Dialog is closed.
+	 * 
 	 */
-	protected int			status	= -1;
-	/**
-	 * This value is returned when the user clicks OK button.
-	 */
-	public static final int	OK		= 0;
-	/**
-	 * This value is returned when the user clicks Cancel button or closes the
-	 * dialog using Window close event.
-	 */
-	public static final int	CANCEL	= -1;
-	/**
-	 * Stores the properties (name-value pairs) that are to be captured from the
-	 * user through this dialog.
-	 */
-	private Properties		properties;
+	private static final long	serialVersionUID		= 1L;
+	protected int				mStatus					= -1;
+	public static final int		OK						= 0;
+	public static final int		CANCEL					= -1;
+	private Properties			mProperties;
+	private final JButton		mOkButton				= new JButton("OK");
+	private final JButton		mCancelButton			= new JButton("Cancel");
+	private final JButton		mResetButton			= new JButton("Reset");
+	private final JButton		mBrowseButton			= new JButton("Browse");
+	private final JTextField	mFileNameSelectionText	= new JTextField("db-1x1.db");
+	private final JTextField	mServerHostText			= new JTextField("localhost");
+	private final JTextField	mServerPortText			= new JTextField("1099");
+	private final boolean		mIsRmiServer;
+	private boolean				mLocalFlag;
 	
-	public PropertiesDialog(JFrame parent) {
-		super(parent);
-		this.setTitle("United Caterers Properties");
-		this.addWindowListener(new WindowAdapter() {
-			
+	public PropertiesDialog(JFrame parentFrame, final boolean isRmiServer) {
+		super(parentFrame);
+		mIsRmiServer = isRmiServer;
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		setResizable(false);
+		setSize(370, 240);
+		mOkButton.addActionListener(this);
+		mCancelButton.addActionListener(this);
+		mResetButton.addActionListener(this);
+		mBrowseButton.addActionListener(this);
+		initGui();
+		setTitle("Kalyan");
+		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent we) {
-				PropertiesDialog.this.status = CANCEL;
+				PropertiesDialog.this.mStatus = CANCEL;
 				synchronized (PropertiesDialog.this) {
 					PropertiesDialog.this.notifyAll();
 				}
 			}
 		});
+		
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see suncertify.gui.PropertiesDialog#initGuiComponents()
+	 */
+	public void initGuiComponents() {
+		// mServerHostText.setVisible(!mIsRmiServer);
+		mServerHostText.setEnabled(!mLocalFlag);
+		mServerPortText.setEnabled(!mLocalFlag);
+		mFileNameSelectionText.setEnabled(mLocalFlag || mIsRmiServer);
+		mBrowseButton.setEnabled(mLocalFlag || mIsRmiServer);
+		if (mIsRmiServer) {
+			mFileNameSelectionText.setText(getProperties().getProperty("dbfile", "db-1x1.db"));
+			mServerPortText.setText(getProperties().getProperty("serverport", "1099"));
+		} else {
+			if (!mLocalFlag) {
+				mServerHostText.setText(getProperties().getProperty("serverhost", "localhost"));
+				mServerPortText.setText(getProperties().getProperty("serverport", "1099"));
+				mFileNameSelectionText.setText("");
+			} else {
+				mServerHostText.setText("");
+				mServerPortText.setText("");
+				mFileNameSelectionText.setText(getProperties().getProperty("dbfile", "db-1x1.db"));
+			}
+		}
 	}
 	
 	/**
-	 * This method must be implemented by the subclass in which it should build
-	 * the GUI.
+	 * 
 	 */
-	public abstract void initGuiComponents();
+	private void initGui() {
+		setSize(370, 240);
+		getContentPane().setLayout(new GridBagLayout());
+		
+		GridBagConstraints gbc = null;
+		
+		gbc = new GridBagConstraints();
+		gbc.gridy = 0;
+		gbc.gridwidth = 3;
+		gbc.fill = java.awt.GridBagConstraints.BOTH;
+		gbc.weightx = 1.0;
+		gbc.insets = new java.awt.Insets(5, 5, 0, 0);
+		
+		String text = "<html>Please specify or confirm the following server properties.<br><br></html>";
+		
+		this.getContentPane().add(new JLabel(text), gbc);
+		
+		int pos = 2;
+		gbc.gridy = pos++;
+		gbc.gridwidth = 1;
+		gbc.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		
+		gbc.weightx = 0.0;
+		this.getContentPane().add(new JLabel("Database File"), gbc);
+		gbc.weightx = 1.0;
+		this.getContentPane().add(mFileNameSelectionText, gbc);
+		gbc.weightx = 0.0;
+		this.getContentPane().add(mBrowseButton, gbc);
+		
+		if (!mIsRmiServer) {
+			gbc.gridy = pos++;
+			this.getContentPane().add(new JLabel("Server Host"), gbc);
+			this.getContentPane().add(mServerHostText, gbc);
+		}
+		
+		gbc.gridy = pos++;
+		this.getContentPane().add(new JLabel("Server port"), gbc);
+		this.getContentPane().add(mServerPortText, gbc);
+		
+		JPanel temppanel = new JPanel();
+		GridLayout gl = new GridLayout(1, 3);
+		gl.setHgap(20);
+		temppanel.setLayout(gl);
+		temppanel.add(mOkButton);
+		temppanel.add(mResetButton);
+		temppanel.add(mCancelButton);
+		
+		gbc.gridy = pos++;
+		gbc.gridwidth = 3;
+		gbc.fill = java.awt.GridBagConstraints.HORIZONTAL;
+		gbc.insets = new java.awt.Insets(5, 25, 15, 25);
+		this.getContentPane().add(temppanel, gbc);
+		
+	}
 	
-	/**
-	 * This is a blocking call that makes the dialog visible and waits until the
-	 * user clicks OK or Cancel. Thus, the subclass, in the actionlisteners of
-	 * OK and Cancel, should call this.notifyAll() after reading the values from
-	 * input fields.
-	 */
 	public int showDialog() {
 		initGuiComponents();
-		this.setLocationRelativeTo(null); // makes sure that the dialog is
-											// centered on the screen.
-		this.setVisible(true);
+		setLocationRelativeTo(null);
+		setVisible(true);
 		synchronized (this) {
 			try {
 				this.wait();
 			} catch (Exception e) {
-				// should not happen
 				e.printStackTrace();
 			}
 		}
-		this.setVisible(false);
-		return status;
+		setVisible(false);
+		return mStatus;
 	}
 	
-	public Properties getProperties() {
-		return properties;
+	/**
+	 * @param localFlag
+	 *            the localFlag to set
+	 */
+	public void setLocalFlag(boolean localFlag) {
+		this.mLocalFlag = localFlag;
 	}
 	
+	/**
+	 * @return the localFlag
+	 */
+	public boolean isLocalFlag() {
+		return mLocalFlag;
+	}
+	
+	/**
+	 * @param properties
+	 *            the properties to set
+	 */
 	public void setProperties(Properties properties) {
-		this.properties = properties;
+		this.mProperties = properties;
+	}
+	
+	/**
+	 * @return the properties
+	 */
+	public Properties getProperties() {
+		return mProperties;
 	}
 	
 	/**
@@ -109,24 +220,97 @@ public abstract class PropertiesDialog extends JDialog {
 	 * loading the properties from a file and saving them back in the same file.
 	 */
 	public Properties loadProperties(String fileName) {
-		Properties props = new Properties();
-		File f = null;
+		Properties prop = new Properties();
+		File file = null;
 		try {
-			f = new File(fileName); // "unitedcaterers.properties"
-			FileInputStream fis = new FileInputStream(f);
-			props.load(fis);
+			file = new File(fileName);
+			FileInputStream fis = new FileInputStream(file);
+			prop.load(fis);
 			fis.close();
-			logger.fine("Properties loaded from : " + f.getCanonicalPath());
+			
+			setProperties(prop);
+			int status = showDialog();
+			if (status == OK) {
+				file = new File(fileName);
+				FileOutputStream fos = new FileOutputStream(file);
+				prop.store(fos, "Settings Changed");
+				fos.close();
+			} else {
+				return null;
+			}
 		} catch (Exception e) {
-			try {
-				logger.log(Level.WARNING, "Exception in loading properties from : " + f.getCanonicalPath());
-			} catch (IOException ioe) {
-				logger.log(Level.WARNING, "Exception in loading properties from : unitedcaterers.properties : Unable to get Canonical Path.");
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(rootPane, "Error Occured :" + e.getLocalizedMessage());
+		}
+		return prop;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
+	@Override
+	public void actionPerformed(ActionEvent ae) {
+		Object src = ae.getSource();
+		if (src == mOkButton) {
+			if (mLocalFlag) {
+				getProperties().setProperty("dbfile", mFileNameSelectionText.getText());
+			} else {
+				getProperties().setProperty("serverhost", mServerHostText.getText());
+				getProperties().setProperty("serverport", mServerPortText.getText());
+			}
+			synchronized (this) {
+				this.mStatus = OK;
+				this.notifyAll();
+			}
+		} else if (src == mCancelButton) {
+			System.exit(0);
+			synchronized (this) {
+				this.mStatus = CANCEL;
+				this.notifyAll();
+			}
+		} else if (src == mResetButton) {
+			mFileNameSelectionText.setText("");
+			mServerHostText.setText("");
+			mServerPortText.setText("");
+		} else if (src == mBrowseButton) {
+			final JFileChooser fileChooser = new JFileChooser(".");
+			fileChooser.setFileFilter(new DBFileFilter());
+			fileChooser.setDialogTitle("Video directory locator");
+			fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+			int returnValue = fileChooser.showOpenDialog(this);
+			if (returnValue == JFileChooser.APPROVE_OPTION) {
+				try {
+					mFileNameSelectionText.setText(fileChooser.getSelectedFile().getCanonicalPath());
+				} catch (IOException e) {
+					mFileNameSelectionText.setText(fileChooser.getSelectedFile().getName());
+				}
 			}
 		}
 		
-		this.setProperties(props);
-		this.showDialog();
-		return props;
 	}
+	
+	private class DBFileFilter extends FileFilter {
+		
+		@Override
+		public boolean accept(File f) {
+			if (f.isDirectory()) {
+				return true;
+			}
+			if (f.getName().toLowerCase().endsWith(".db")) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		
+		@Override
+		public String getDescription() {
+			return "UrlyBird DB(*.db)";
+		}
+		
+	}
+	
 }
