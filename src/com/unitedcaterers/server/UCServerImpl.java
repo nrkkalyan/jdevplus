@@ -47,25 +47,31 @@ public class UCServerImpl implements UBServer {
 		}
 	}
 	
-	@Override
-	public String[][] searchCaterersByHotelName(String hotelName) throws RemoteException, UCException {
-		if (db == null) {
-			throw new UCException("Connection to the database has been closed. Must restart/recreate the server.");
-		}
-		String[] criteria = new String[] { hotelName, null, null, null, null, null, null };
-		return findAndReturnData(criteria);
-	}
+	// @Override
+	// public String[][] searchCaterersByHotelName(String hotelName) throws
+	// RemoteException, UCException {
+	// if (db == null) {
+	// throw new
+	// UCException("Connection to the database has been closed. Must restart/recreate the server.");
+	// }
+	// String[] criteria = new String[] { hotelName, null, null, null, null,
+	// null, null };
+	// return findAndReturnData(criteria);
+	// }
 	
-	@Override
-	public String[][] searchCaterersByLocation(String location) throws RemoteException, UCException {
-		if (db == null) {
-			throw new UCException("Connection to the database has been closed. Must restart/recreate the server.");
-		}
-		
-		String[] criteria = new String[] { null, location, null, null, null, null, null };
-		return findAndReturnData(criteria);
-		
-	}
+	// @Override
+	// public String[][] searchCaterersByLocation(String location) throws
+	// RemoteException, UCException {
+	// if (db == null) {
+	// throw new
+	// UCException("Connection to the database has been closed. Must restart/recreate the server.");
+	// }
+	//
+	// String[] criteria = new String[] { null, location, null, null, null,
+	// null, null };
+	// return findAndReturnData(criteria);
+	//
+	// }
 	
 	@Override
 	public String[][] searchCaterersByHotelNameAndLocation(String hotelName, String location) throws RemoteException, UCException {
@@ -77,17 +83,19 @@ public class UCServerImpl implements UBServer {
 		
 	}
 	
-	@Override
-	public String[][] getAllCaterers() throws RemoteException, UCException {
-		if (db == null) {
-			throw new UCException("Connection to the database has been closed. Must restart/recreate the server.");
-		}
-		String[] criteria = new String[] { null, null, null, null, null, null, null };
-		return findAndReturnData(criteria);
-	}
+	// @Override
+	// public String[][] getAllCaterers() throws RemoteException, UCException {
+	// if (db == null) {
+	// throw new
+	// UCException("Connection to the database has been closed. Must restart/recreate the server.");
+	// }
+	// String[] criteria = new String[] { null, null, null, null, null, null,
+	// null };
+	// return findAndReturnData(criteria);
+	// }
 	
 	@Override
-	public boolean bookCaterer(String customerid, String[] originalData) throws RemoteException, UCException {
+	public boolean bookRoom(String customerid, String[] originalData) throws RemoteException, UCException {
 		if (db == null) {
 			throw new UCException("Connection to the database has been closed. Must restart/recreate the server.");
 		}

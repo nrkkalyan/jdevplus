@@ -47,7 +47,7 @@ public class UrlyBirdClientController implements ActionListener {
 	/**
 	 * The current search parameters. It is used to refresh the table.
 	 */
-	private String					currentQuery	= "";
+	// private String currentQuery = "";
 	private String					currentHotelName;
 	private String					currentLocation;
 	/**
@@ -118,7 +118,7 @@ public class UrlyBirdClientController implements ActionListener {
 			}
 		});
 		
-		connect(localflag);
+		connectToServer(localflag);
 		
 	}
 	
@@ -130,7 +130,7 @@ public class UrlyBirdClientController implements ActionListener {
 	 * @param pLocalflag
 	 *            If true, it means it is a standalone client
 	 */
-	private void connect(boolean pLocalflag) {
+	private void connectToServer(boolean pLocalflag) {
 		try {
 			mUBClientPropertiesDialog.setLocalFlag(pLocalflag);
 			Properties props = mUBClientPropertiesDialog.loadProperties("suncertify.properties");
@@ -208,7 +208,7 @@ public class UrlyBirdClientController implements ActionListener {
 				
 				@Override
 				public void run() {
-					connect(true);
+					connectToServer(true);
 				}
 			}.start();
 		} else if ("CONNECT_REMOTE".equals(action)) {
@@ -216,7 +216,7 @@ public class UrlyBirdClientController implements ActionListener {
 				
 				@Override
 				public void run() {
-					connect(false);
+					connectToServer(false);
 				}
 			}.start();
 		}
@@ -252,15 +252,18 @@ public class UrlyBirdClientController implements ActionListener {
 			// }
 			
 			String[] aSplit = action.substring(i1 + 1).split(",");
-			String name = aSplit[0];
+			String name = null;
 			String loc = null;
-			if (aSplit.length > 1) {
+			if (aSplit.length == 1) {
+				name = aSplit[0];
+			} else if (aSplit.length >= 2) {
+				name = aSplit[0];
 				loc = aSplit[1];
 			}
-			doSearchCaterers(name, loc);
+			searchByHotelNameAndLocation(name, loc);
 		} else if (action.indexOf("BOOK_CATERER") != -1) {
-			bookRoom(action); // ActionCommand for this would be like:
-								// BOOK_CATERER:12
+			bookRoom(); // ActionCommand for this would be like:
+						// BOOK_CATERER:12
 		} /*
 		 * else if ("APP_HELP".equals(action)) {
 		 * JOptionPane.showMessageDialog(mClientFrame,
@@ -285,24 +288,19 @@ public class UrlyBirdClientController implements ActionListener {
 	 *            The the complete action command that has row index attached to
 	 *            it.
 	 */
-	public void bookRoom(String action) {
+	public void bookRoom() {
 		if (mUBServer == null) {
 			JOptionPane.showMessageDialog(mClientFrame, "Please connect to a server before booking.", "Book Caterer", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
-		int x = action.indexOf(":");
 		String[] data = null;
-		if (x != -1 && x < action.length()) {
-			int index = Integer.parseInt(action.substring(x + 1).trim());
-			data = mClientModel.getDisplayRows()[index];
-		} else {
-			int ind = mClientFrame.getTablePanel().getSelectedIndex();
-			if (ind == -1) {
-				JOptionPane.showMessageDialog(mClientFrame, "Please select a caterer from the list of caterers first.", "Book Caterer", JOptionPane.INFORMATION_MESSAGE);
-				return;
-			}
-			data = mClientModel.getDisplayRows()[ind];
+		
+		int ind = mClientFrame.getTablePanel().getSelectedIndex();
+		if (ind == -1) {
+			JOptionPane.showMessageDialog(mClientFrame, "Please select a caterer from the list of caterers first.", "Book Caterer", JOptionPane.INFORMATION_MESSAGE);
+			return;
 		}
+		data = mClientModel.getDisplayRows()[ind];
 		
 		if (data[7] != null && data[7].trim().length() > 0) {
 			JOptionPane.showMessageDialog(mClientFrame, "Room is already booked.", "Book Caterer", JOptionPane.INFORMATION_MESSAGE);
@@ -315,7 +313,7 @@ public class UrlyBirdClientController implements ActionListener {
 		int value = JOptionPane.showConfirmDialog(mClientFrame, arrayMessage, "Input", JOptionPane.OK_CANCEL_OPTION);
 		if (value == 0) {
 			if (!customerIDTextField.isEditValid()) {
-				JOptionPane.showMessageDialog(mClientFrame, "Invalid Customer id.(8 digits) ", "Book Caterer", JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(mClientFrame, "Invalid Customer id.(8 digits) ", "Book Caterer", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 			String customerid = customerIDTextField.getText();
@@ -324,16 +322,16 @@ public class UrlyBirdClientController implements ActionListener {
 			// characters
 			try {
 				
-				boolean status = mUBServer.bookCaterer(customerid, data);
+				boolean status = mUBServer.bookRoom(customerid, data);
 				if (status) {
-					refreshView(currentQuery, currentHotelName, currentLocation);
+					searchByHotelNameAndLocation(currentHotelName, currentLocation);
 				} else {
 					JOptionPane.showMessageDialog(mClientFrame, "Sorry, Unable to book this caterer.", "Book Caterer", JOptionPane.INFORMATION_MESSAGE);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(mClientFrame, "Unable to book the caterer. " + e.getMessage(), "Book Caterer", JOptionPane.INFORMATION_MESSAGE);
-				refreshView(currentQuery, currentHotelName, currentLocation);
+				searchByHotelNameAndLocation(currentHotelName, currentLocation);
 			}
 			
 		}
@@ -377,57 +375,37 @@ public class UrlyBirdClientController implements ActionListener {
 	 * calls refreshView() method that updates the model and notifies observers
 	 * thereby updating the view frame.
 	 */
-	public void searchCaterers() {
-		Object obj = JOptionPane.showInputDialog(mClientFrame, "How many number of guests do you want to cater to?(Click Cancel if no preference)", "Max Guests",
-				JOptionPane.INFORMATION_MESSAGE, null, null, "50");
-		String hotelName = null;
-		if (obj != null) {
-			try {
-				hotelName = obj.toString().trim();
-				currentHotelName = hotelName;
-			} catch (Exception e) {
-				// do nothing or pop up error message.
-			}
-		}
-		
-		String location = null;
-		obj = JOptionPane.showInputDialog(mClientFrame, "Which location are you in?(Click Cancel if no preference)", "View Routes", JOptionPane.INFORMATION_MESSAGE, null, null,
-				"Iselin");
-		if (obj != null) {
-			location = obj.toString().trim();
-			currentLocation = location;
-		}
-		
-		doSearchCaterers(hotelName, currentLocation);
-		
-	}
-	
-	private void doSearchCaterers(String hotelName, String location) {
-		try {
-			
-			if (location != null && hotelName != null && !hotelName.trim().isEmpty() && !location.trim().isEmpty()) {
-				currentQuery = "viewbyhotelnameandlocation";
-				refreshView(currentQuery, hotelName, location);
-			} else if (location != null && !location.trim().isEmpty()) {
-				currentQuery = "viewbylocation";
-				refreshView(currentQuery, "", location);
-			} else if (hotelName != null && !hotelName.trim().isEmpty()) {
-				currentQuery = "viewbyhotelname";
-				refreshView(currentQuery, hotelName, "");
-			} else {
-				currentQuery = "viewall";
-				refreshView(currentQuery, "", "");
-			}
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(mClientFrame, "Exception occured in processing request : " + e.getMessage(), "UC Message", JOptionPane.ERROR_MESSAGE);
-			logger.log(Level.WARNING, "Exception in processing request.", e);
-		}
-		
-	}
+	// public void searchCaterers() {
+	// Object obj = JOptionPane.showInputDialog(mClientFrame,
+	// "How many number of guests do you want to cater to?(Click Cancel if no preference)",
+	// "Max Guests",
+	// JOptionPane.INFORMATION_MESSAGE, null, null, "50");
+	// String hotelName = null;
+	// if (obj != null) {
+	// try {
+	// hotelName = obj.toString().trim();
+	// currentHotelName = hotelName;
+	// } catch (Exception e) {
+	// // do nothing or pop up error message.
+	// }
+	// }
+	//
+	// String location = null;
+	// obj = JOptionPane.showInputDialog(mClientFrame,
+	// "Which location are you in?(Click Cancel if no preference)",
+	// "View Routes", JOptionPane.INFORMATION_MESSAGE, null, null,
+	// "Iselin");
+	// if (obj != null) {
+	// location = obj.toString().trim();
+	// currentLocation = location;
+	// }
+	//
+	// searchByHotelNameAndLocation(hotelName, currentLocation);
+	//
+	// }
 	
 	public void showAllRooms() {
-		currentQuery = "viewall";
-		refreshView(currentQuery, null, null);
+		searchByHotelNameAndLocation(null, null);
 	}
 	
 	/**
@@ -437,23 +415,14 @@ public class UrlyBirdClientController implements ActionListener {
 	 * @param maxguests
 	 * @param location
 	 */
-	private void refreshView(String query, String hotelName, String location) {
+	private void searchByHotelNameAndLocation(String hotelName, String location) {
 		if (mUBServer == null) {
 			JOptionPane.showMessageDialog(mClientFrame, "Please connect to a server first. ", "Unconnected", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
 		try {
 			String[][] data = new String[0][0];
-			if ("viewall".equals(query)) {
-				data = mUBServer.getAllCaterers();
-				
-			} else if ("viewbyhotelname".equals(query)) {
-				data = mUBServer.searchCaterersByHotelName(hotelName);
-			} else if ("viewbylocation".equals(query)) {
-				data = mUBServer.searchCaterersByLocation(location);
-			} else if ("viewbyhotelnameandlocation".equals(query)) {
-				data = mUBServer.searchCaterersByHotelNameAndLocation(hotelName, location);
-			}
+			data = mUBServer.searchCaterersByHotelNameAndLocation(hotelName, location);
 			mClientModel.setDisplayRows(data);
 			mClientModel.notifyObservers();
 			// mainModel.getMessageModel().notifyObservers();

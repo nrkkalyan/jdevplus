@@ -21,29 +21,31 @@ public class RMIUCServerImpl extends UnicastRemoteObject implements UBServer {
 		ucs = new UCServerImpl(dbfilename);
 	}
 	
-	@Override
-	public String[][] searchCaterersByHotelName(String hotelName) throws RemoteException, UCException {
-		return ucs.searchCaterersByHotelName(hotelName);
-	}
+	// @Override
+	// public String[][] searchCaterersByHotelName(String hotelName) throws
+	// RemoteException, UCException {
+	// return ucs.searchCaterersByHotelName(hotelName);
+	// }
 	
-	@Override
-	public String[][] searchCaterersByLocation(String location) throws RemoteException, UCException {
-		return ucs.searchCaterersByLocation(location);
-	}
+	// @Override
+	// public String[][] searchCaterersByLocation(String location) throws
+	// RemoteException, UCException {
+	// return ucs.searchCaterersByLocation(location);
+	// }
 	
 	@Override
 	public String[][] searchCaterersByHotelNameAndLocation(String hotelName, String location) throws RemoteException, UCException {
 		return ucs.searchCaterersByHotelNameAndLocation(hotelName, location);
 	}
 	
-	@Override
-	public String[][] getAllCaterers() throws RemoteException, UCException {
-		return ucs.getAllCaterers();
-	}
+	// @Override
+	// public String[][] getAllCaterers() throws RemoteException, UCException {
+	// return ucs.getAllCaterers();
+	// }
 	
 	@Override
-	public boolean bookCaterer(String customerid, String[] originalData) throws RemoteException, UCException {
-		return ucs.bookCaterer(customerid, originalData);
+	public boolean bookRoom(String customerid, String[] originalData) throws RemoteException, UCException {
+		return ucs.bookRoom(customerid, originalData);
 	}
 	
 }
