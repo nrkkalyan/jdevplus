@@ -610,4 +610,18 @@ public class Data implements DB {
 		}
 	}
 	
+	public static void main(String[] args) throws Exception {
+		Data db = new Data("db-1x1.db");
+		LockTestThread lt1 = new LockTestThread("DB-1", db);
+		lt1.start();
+		
+		LockTestThread lt2 = new LockTestThread("DB-2", db);
+		lt2.start();
+		
+		LockTestThread lt3 = new LockTestThread("DB-3", db);
+		lt3.start();
+		
+		LockTestThread lt4 = new LockTestThread("DB-4", db);
+		lt4.start();
+	}
 }
