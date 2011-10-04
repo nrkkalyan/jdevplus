@@ -16,7 +16,7 @@ import com.unitedcaterers.util.PropertiesDialog;
  * @author Enthuware
  * @version 1.0
  */
-public class RMIServerMain {
+public class UrlyBirdRMIServer {
 	private static Logger			logger	= Logger.getLogger("com.unitedcaterers.server.RMIServerMain");
 	public static PropertiesDialog	pd		= new PropertiesDialog(null, true);
 	

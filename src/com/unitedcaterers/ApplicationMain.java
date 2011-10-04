@@ -1,6 +1,8 @@
 package com.unitedcaterers;
 
-import com.unitedcaterers.server.RMIServerMain;
+import com.unitedcaterers.client.UrlyBirdClientController;
+import com.unitedcaterers.client.UrlyBirdClientFrame;
+import com.unitedcaterers.server.UrlyBirdRMIServer;
 
 /**
  * This class is the entry point to the application. It determines what - the
@@ -14,13 +16,22 @@ public class ApplicationMain {
 	public static void main(String[] args) throws Exception {
 		
 		if (args.length == 0) {
-			UrlyBirdClientMain.startup("rmi");
+			startup("rmi");
 		} else if ("alone".equalsIgnoreCase(args[0])) {
-			UrlyBirdClientMain.startup("none");
+			startup("none");
 		} else if ("server".equalsIgnoreCase(args[0])) {
-			RMIServerMain.startup();
+			UrlyBirdRMIServer.startup();
 		} else {
 			System.out.println("Invalid argument to main. Supported options are: server, alone, or no arguments.");
 		}
+	}
+	
+	public static void startup(String clienttype) {
+		UrlyBirdClientFrame cf = new UrlyBirdClientFrame();
+		UrlyBirdClientController cc = new UrlyBirdClientController(cf, clienttype);
+		cf.setSize(700, 700);
+		cf.setLocationRelativeTo(null); // makes sure that the frame is centered
+		cf.setVisible(true);
+		cc.showAllRooms();
 	}
 }

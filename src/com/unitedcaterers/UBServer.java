@@ -21,15 +21,8 @@ import com.unitedcaterers.util.UCException;
  * */
 
 public interface UBServer extends java.rmi.Remote {
-	// String[][] searchCaterersByHotelName(String hotelName) throws
-	// RemoteException, UCException;
-	//
-	// String[][] searchCaterersByLocation(String location) throws
-	// RemoteException, UCException;
 	
 	String[][] searchCaterersByHotelNameAndLocation(String hotelName, String location) throws RemoteException, UCException;
-	
-	// String[][] getAllCaterers() throws RemoteException, UCException;
 	
 	boolean bookRoom(String customerid, String[] originalData) throws RemoteException, UCException;
 	

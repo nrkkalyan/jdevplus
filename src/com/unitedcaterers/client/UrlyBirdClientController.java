@@ -425,7 +425,6 @@ public class UrlyBirdClientController implements ActionListener {
 			data = mUBServer.searchCaterersByHotelNameAndLocation(hotelName, location);
 			mClientModel.setDisplayRows(data);
 			mClientModel.notifyObservers();
-			// mainModel.getMessageModel().notifyObservers();
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(mClientFrame, "Exception occured in processing request : " + e.getMessage(), "UC Message", JOptionPane.ERROR_MESSAGE);
 			logger.log(Level.WARNING, "Exception in processing request", e);
