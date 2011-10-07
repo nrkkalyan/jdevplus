@@ -163,18 +163,18 @@ public class Data implements DB {
 	 *            The record number to be updated
 	 * @param data
 	 *            New data for the record
-	 * @param lockkey
+	 * @param lockCookie
 	 *            The record should have been locked with this key.
 	 */
 	@Override
-	public synchronized void update(int recNo, String[] data, long lockkey) throws RecordNotFoundException, SecurityException {
+	public synchronized void update(int recNo, String[] data, long lockCookie) throws RecordNotFoundException, SecurityException {
 		if (recNo < 0) {
 			throw new RecordNotFoundException("No such record : " + recNo);
 		}
 		if (data == null || data.length != fieldnames.length) {
 			throw new SecurityException("Invalid Data");
 		}
-		if (lockkey == -1) {
+		if (lockCookie == -1) {
 			throw new SecurityException("Invalid lock key");
 		}
 		Long realkey = locker.getOwner(recNo);
@@ -182,7 +182,7 @@ public class Data implements DB {
 			throw new SecurityException("You have to lock the record first before updating it.");
 		}
 		
-		if (realkey.equals(lockkey)) {
+		if (realkey.equals(lockCookie)) {
 			try {
 				ras.seek(offset + recNo * recordlength);
 				byte[] ba = new byte[recordlength];
@@ -238,7 +238,7 @@ public class Data implements DB {
 	 * 
 	 * @param recNo
 	 *            The record number that is to be deleted.
-	 * @param lockkey
+	 * @param lockCookie
 	 *            The record should have been locked using this key.
 	 * @throws RecordNotFoundException
 	 *             Thrown if this record number does not exist.
@@ -247,11 +247,11 @@ public class Data implements DB {
 	 *             record was locked.
 	 */
 	@Override
-	public synchronized void delete(int recNo, long lockkey) throws RecordNotFoundException, SecurityException {
+	public synchronized void delete(int recNo, long lockCookie) throws RecordNotFoundException, SecurityException {
 		if (recNo < 0) {
 			throw new RecordNotFoundException("No such record : " + recNo);
 		}
-		if (lockkey == -1) {
+		if (lockCookie == -1) {
 			throw new SecurityException("Invalid lock key");
 		}
 		Long realkey = locker.getOwner(recNo);
@@ -259,7 +259,7 @@ public class Data implements DB {
 			throw new SecurityException("You have to lock the record first before updating it.");
 		}
 		
-		if (realkey.equals(lockkey)) {
+		if (realkey.equals(lockCookie)) {
 			try {
 				ras.seek(offset + recNo * recordlength);
 				byte[] ba = new byte[recordlength];
@@ -289,7 +289,7 @@ public class Data implements DB {
 	 */
 	@Override
 	public synchronized int[] find(String[] criteria) {
-		ArrayList<Integer> matchingindices = new ArrayList<Integer>();
+		ArrayList<Integer> matchingIndices = new ArrayList<Integer>();
 		try {
 			if (criteria == null || criteria.length != fieldnames.length) {
 				return new int[0]; // return empty array if criteria is invalid.
@@ -316,14 +316,14 @@ public class Data implements DB {
 					}
 				}
 				if (match) {
-					matchingindices.add(new Integer(recno));
+					matchingIndices.add(new Integer(recno));
 				}
 				recno++;
 			}
-			int noofmatches = matchingindices.size();
+			int noofmatches = matchingIndices.size();
 			int[] retvalue = new int[noofmatches];
 			for (int i = 0; i < noofmatches; i++) {
-				retvalue[i] = (matchingindices.get(i)).intValue();
+				retvalue[i] = (matchingIndices.get(i)).intValue();
 			}
 			return retvalue;
 		} catch (Exception e) {
