@@ -3,20 +3,20 @@ package com.unitedcaterers.util;
  *A generic checked Exception used by this application for reporting any business logic exception.
  *Instead of creating multiple Exception subclasses only one subclass is used for simplicity.
  */
-public class UCException extends Exception {
+public class UBException extends Exception {
 
-  public UCException() {
+  public UBException() {
   }
 
-  public UCException(String message) {
+  public UBException(String message) {
     super(message);
   }
 
-  public UCException(String message, Throwable cause) {
+  public UBException(String message, Throwable cause) {
     super(message, cause);
   }
 
-  public UCException(Throwable cause) {
+  public UBException(Throwable cause) {
     super(cause);
   }
 }

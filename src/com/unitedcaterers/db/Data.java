@@ -11,8 +11,6 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.unitedcaterers.util.UCException;
-
 /**
  * This class implements the DataBase interface.
  * 
@@ -64,13 +62,13 @@ public class Data implements DB {
 	 *             not match with the magiccode stored in the dbfile.
 	 * @throws SecurityException
 	 */
-	public Data(String dbfilename) throws IOException, UCException {
+	public Data(String dbfilename) throws IOException, SecurityException {
 		FileInputStream fis = new FileInputStream(dbfilename);
 		DataInputStream dis = new DataInputStream(fis);
 		
 		int magicCookie = dis.readInt();
 		if (magicCookie != DBConstants.MAGIC_COOKIE_REFERENCE) {
-			throw new UCException("Invalid cookie in specified database file");
+			throw new SecurityException("Invalid cookie in specified database file");
 		}
 		offset += MAGIC_COOKIE_BYTES + RECORD_LENGTH_BYTES + NUMBER_OF_FIELDS_BYTES;
 		recordlength = dis.readInt();
@@ -304,7 +302,7 @@ public class Data implements DB {
 					recno++;
 					continue;
 				}
-				String[] fielddata = parseRecord(rec);
+				final String[] fielddata = parseRecord(rec);
 				boolean match = true;
 				for (int i = 0; i < fieldnames.length; i++) {
 					if (criteria[i] == null) {
@@ -355,11 +353,11 @@ public class Data implements DB {
 		}
 		
 		try {
-			int deletedRecNo = getDeletedRecordNo();
-			ras.seek(offset + deletedRecNo * recordlength);
+			int newOrDeletedRecNo = getPositionToInsert();
+			ras.seek(offset + newOrDeletedRecNo * recordlength);
 			ras.writeByte(VALIDROW_BYTE1);
 			ras.write(getByteArray(data));
-			return deletedRecNo;
+			return newOrDeletedRecNo;
 		} catch (Exception e) {
 			throw new DuplicateKeyException("Unable to create new record : " + e.getMessage());
 		}
@@ -371,7 +369,7 @@ public class Data implements DB {
 	 * 
 	 * @return record number of first available deleted record.
 	 */
-	private int getDeletedRecordNo() {
+	private int getPositionToInsert() {
 		try {
 			int retval = 0;
 			ras.seek(offset);
@@ -420,7 +418,7 @@ public class Data implements DB {
 	 * 
 	 * @param recNo
 	 *            Record to be unlocked. -1 implies unlock the database.
-	 * @param lockkey
+	 * @param cookie
 	 *            The record (or the database) should have been locked using
 	 *            this key.
 	 * @throws RecordNotFoundException
@@ -430,8 +428,8 @@ public class Data implements DB {
 	 *             record was locked.
 	 */
 	@Override
-	public void unlock(int recNo, long lockkey) throws RecordNotFoundException, SecurityException {
-		locker.unlock(recNo, lockkey);
+	public void unlock(int recNo, long cookie) throws RecordNotFoundException, SecurityException {
+		locker.unlock(recNo, cookie);
 	}
 	
 	/**
@@ -456,16 +454,14 @@ public class Data implements DB {
 		private synchronized long lockDB() {
 			while (dblocked || locks.size() != 0) {
 				try {
-					logger.fine("   Thread #" + Thread.currentThread().getId() + " waiting for DB Lock... dblocked flag = " + dblocked + " locker size = " + locks.size());
 					wait();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-			logger.fine("   Thread #" + Thread.currentThread().getId() + " got DB Lock.");
 			
 			dblocked = true;
-			dbkey = new java.util.Date().getTime();
+			dbkey = System.nanoTime();
 			return dbkey;
 		}
 		
@@ -485,23 +481,18 @@ public class Data implements DB {
 			
 			Long key = locks.get(recordNo);
 			if (key == null && !dblocked) {
-				key = new java.util.Date().getTime();
+				key = System.nanoTime();
 				locks.put(recordNo, key);
-				logger.fine("   Thread #" + Thread.currentThread().getId() + " get lock for Record " + recordNo);
 				return key;
 			} else {
 				while (locks.get(recordNo) != null || dblocked) {
 					try {
-						logger.fine("   Thread #" + Thread.currentThread().getId() + " entering wait for Record " + recordNo);
 						wait();
 					} catch (Exception e) {
-						logger.warning("Some Exception in waiting for record :" + recordNo);
+						e.printStackTrace();
 					}
 				}
-				logger.fine("   Thread #" + Thread.currentThread().getId() + " got lock for Record " + recordNo);
-				key = new java.util.Date().getTime();
-				locks.put(recordNo, key);
-				return key;
+				return lock(recordNo);
 			}
 		}
 		
@@ -511,9 +502,9 @@ public class Data implements DB {
 		 * 
 		 * @param int recordNo The record no. to be unlocked.
 		 */
-		public synchronized void unlock(int recordNo, long lockkey) throws SecurityException {
-			if (recordNo == -1) {
-				if (lockkey != -1 && dbkey == lockkey) {
+		public synchronized void unlock(int recNo, long cookie) throws SecurityException {
+			if (recNo == -1) {
+				if (cookie != -1 && dbkey == cookie) {
 					dblocked = false;
 					logger.fine("   Thread #" + Thread.currentThread().getId() + " unlocking DB");
 					notifyAll();
@@ -523,14 +514,13 @@ public class Data implements DB {
 				}
 			}
 			
-			Long key = locks.get(recordNo);
+			Long key = locks.get(recNo);
 			
-			if (key != null && lockkey == key) {
-				locks.remove(recordNo);
-				logger.fine("   Thread #" + Thread.currentThread().getId() + " unlocking Record " + recordNo);
+			if (key != null && cookie == key) {
+				locks.remove(recNo);
 				notifyAll();
 			} else {
-				throw new SecurityException("You don't own lock for this record : " + recordNo);
+				throw new SecurityException("You don't own lock for this record : " + recNo);
 			}
 			
 		}

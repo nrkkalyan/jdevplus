@@ -2,7 +2,7 @@ package com.unitedcaterers;
 
 import java.rmi.RemoteException;
 
-import com.unitedcaterers.util.UCException;
+import com.unitedcaterers.util.UBException;
 
 /**
  * This interface captures all the business methods required by the client. Both
@@ -20,10 +20,10 @@ import com.unitedcaterers.util.UCException;
  * exceptions.
  * */
 
-public interface UBServer extends java.rmi.Remote {
+public interface UB extends java.rmi.Remote {
 	
-	String[][] searchCaterersByHotelNameAndLocation(String hotelName, String location) throws RemoteException, UCException;
+	String[][] searchCaterersByHotelNameAndLocation(String hotelName, String location) throws RemoteException, UBException;
 	
-	boolean bookRoom(String customerid, String[] originalData) throws RemoteException, UCException;
+	boolean bookRoom(String customerid, String[] originalData) throws RemoteException, UBException;
 	
 }

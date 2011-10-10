@@ -3,8 +3,9 @@ package com.unitedcaterers.server;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
-import com.unitedcaterers.UBServer;
-import com.unitedcaterers.util.UCException;
+import com.unitedcaterers.UB;
+import com.unitedcaterers.db.SecurityException;
+import com.unitedcaterers.util.UBException;
 
 /**
  * Since we need to make this a RMI Remote object we have to extend it from
@@ -13,12 +14,16 @@ import com.unitedcaterers.util.UCException;
  * it is exactly same as UCServer except that it is a remote class.
  */
 
-public class RMIUCServerImpl extends UnicastRemoteObject implements UBServer {
+public class UBRmiImpl extends UnicastRemoteObject implements UB {
 	
-	private final UCServerImpl	ucs;
+	/**
+	 * 
+	 */
+	private static final long	serialVersionUID	= 1L;
+	private final UBImpl		ucs;
 	
-	public RMIUCServerImpl(String dbfilename) throws RemoteException, UCException {
-		ucs = new UCServerImpl(dbfilename);
+	public UBRmiImpl(String dbfilename) throws RemoteException, UBException, SecurityException {
+		ucs = new UBImpl(dbfilename);
 	}
 	
 	// @Override
@@ -34,7 +39,7 @@ public class RMIUCServerImpl extends UnicastRemoteObject implements UBServer {
 	// }
 	
 	@Override
-	public String[][] searchCaterersByHotelNameAndLocation(String hotelName, String location) throws RemoteException, UCException {
+	public String[][] searchCaterersByHotelNameAndLocation(String hotelName, String location) throws RemoteException, UBException {
 		return ucs.searchCaterersByHotelNameAndLocation(hotelName, location);
 	}
 	
@@ -44,7 +49,7 @@ public class RMIUCServerImpl extends UnicastRemoteObject implements UBServer {
 	// }
 	
 	@Override
-	public boolean bookRoom(String customerid, String[] originalData) throws RemoteException, UCException {
+	public boolean bookRoom(String customerid, String[] originalData) throws RemoteException, UBException {
 		return ucs.bookRoom(customerid, originalData);
 	}
 	

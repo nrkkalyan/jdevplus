@@ -5,11 +5,12 @@ import java.rmi.RemoteException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.unitedcaterers.UBServer;
+import com.unitedcaterers.UB;
 import com.unitedcaterers.db.DB;
 import com.unitedcaterers.db.Data;
 import com.unitedcaterers.db.RecordNotFoundException;
-import com.unitedcaterers.util.UCException;
+import com.unitedcaterers.db.SecurityException;
+import com.unitedcaterers.util.UBException;
 
 /**
  * This abstract class captures all the business methods required by the client.
@@ -34,70 +35,33 @@ import com.unitedcaterers.util.UCException;
  * exceptions.
  */
 
-public class UCServerImpl implements UBServer {
+public class UBImpl implements UB {
 	protected static Logger	logger	= Logger.getLogger("com.unitedcaterers.server.UCServer");
 	private DB				db;
 	
 	// a boolean flag to determine whether there is a valid db or not.
-	public UCServerImpl(String dbfilename) throws RemoteException, UCException {
+	public UBImpl(String dbfilename) throws RemoteException, UBException, SecurityException {
 		try {
 			db = new Data(dbfilename);
 		} catch (IOException ioe) {
-			throw new UCException("Unable to connect to the database. : " + ioe.getMessage());
+			throw new UBException("Unable to connect to the database. : " + ioe.getMessage());
 		}
 	}
 	
-	// @Override
-	// public String[][] searchCaterersByHotelName(String hotelName) throws
-	// RemoteException, UCException {
-	// if (db == null) {
-	// throw new
-	// UCException("Connection to the database has been closed. Must restart/recreate the server.");
-	// }
-	// String[] criteria = new String[] { hotelName, null, null, null, null,
-	// null, null };
-	// return findAndReturnData(criteria);
-	// }
-	
-	// @Override
-	// public String[][] searchCaterersByLocation(String location) throws
-	// RemoteException, UCException {
-	// if (db == null) {
-	// throw new
-	// UCException("Connection to the database has been closed. Must restart/recreate the server.");
-	// }
-	//
-	// String[] criteria = new String[] { null, location, null, null, null,
-	// null, null };
-	// return findAndReturnData(criteria);
-	//
-	// }
-	
 	@Override
-	public String[][] searchCaterersByHotelNameAndLocation(String hotelName, String location) throws RemoteException, UCException {
+	public String[][] searchCaterersByHotelNameAndLocation(String hotelName, String location) throws RemoteException, UBException {
 		if (db == null) {
-			throw new UCException("Connection to the database has been closed. Must restart/recreate the server.");
+			throw new UBException("Connection to the database has been closed. Must restart/recreate the server.");
 		}
 		String[] criteria = new String[] { hotelName, location, null, null, null, null, null };
 		return findAndReturnData(criteria);
 		
 	}
 	
-	// @Override
-	// public String[][] getAllCaterers() throws RemoteException, UCException {
-	// if (db == null) {
-	// throw new
-	// UCException("Connection to the database has been closed. Must restart/recreate the server.");
-	// }
-	// String[] criteria = new String[] { null, null, null, null, null, null,
-	// null };
-	// return findAndReturnData(criteria);
-	// }
-	
 	@Override
-	public boolean bookRoom(String customerid, String[] originalData) throws RemoteException, UCException {
+	public boolean bookRoom(String customerid, String[] originalData) throws RemoteException, UBException {
 		if (db == null) {
-			throw new UCException("Connection to the database has been closed. Must restart/recreate the server.");
+			throw new UBException("Connection to the database has been closed. Must restart/recreate the server.");
 		}
 		// you might also want to implement server side data validation on
 		// customerid here.
@@ -122,7 +86,7 @@ public class UCServerImpl implements UBServer {
 				
 				if (datachanged) {
 					// row will be unlocked in finally clause
-					throw new UCException("The caterer data was updated. Please refresh your view and try again.");
+					throw new UBException("The caterer data was updated. Please refresh your view and try again.");
 				}
 				data[6] = customerid;
 				db.update(recordNo, data, lockkey);
@@ -130,14 +94,14 @@ public class UCServerImpl implements UBServer {
 			} else if (data[6].trim().equals(customerid)) {
 				status = true;
 			} else
-				throw new UCException("This caterer is already booked.");
+				throw new UBException("This room is already booked.");
 			
 			return status;
 			
 		} catch (RecordNotFoundException re) {
-			throw new UCException("Unable to book the caterer because it does not exist.");
+			throw new UBException("Unable to book the caterer because it does not exist.");
 		} catch (com.unitedcaterers.db.SecurityException se) {
-			throw new UCException("Unable to book the caterer because of SecurityException. This should not happen.");
+			throw new UBException("Unable to book the caterer because of SecurityException. This should not happen.");
 		} finally {
 			try {
 				if (lockkey != null)
@@ -160,9 +124,9 @@ public class UCServerImpl implements UBServer {
 	 *            A string array of same length as the number of fields.
 	 * @return An array of integers containing record numbers.
 	 */
-	public String[][] findAndReturnData(String[] criteria) throws UCException {
+	public String[][] findAndReturnData(String[] criteria) throws UBException {
 		if (db == null) {
-			throw new UCException("Connection to the database has been closed. Must restart/recreate the server.");
+			throw new UBException("Connection to the database has been closed. Must restart/recreate the server.");
 		}
 		String[][] retval = null;
 		Long lockkey = null;

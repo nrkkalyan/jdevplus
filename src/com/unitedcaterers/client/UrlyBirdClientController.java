@@ -12,9 +12,9 @@ import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
-import com.unitedcaterers.UBServer;
+import com.unitedcaterers.UB;
 import com.unitedcaterers.client.gui.EightDigitsTextField;
-import com.unitedcaterers.server.UCServerImpl;
+import com.unitedcaterers.server.UBImpl;
 import com.unitedcaterers.util.PropertiesDialog;
 
 /**
@@ -43,7 +43,7 @@ public class UrlyBirdClientController implements ActionListener {
 	 * database. All you need to do is create an appropriate DBAdapter and set
 	 * it here.
 	 */
-	private UBServer				mUBServer		= null;
+	private UB				mUBServer		= null;
 	/**
 	 * The current search parameters. It is used to refresh the table.
 	 */
@@ -112,7 +112,7 @@ public class UrlyBirdClientController implements ActionListener {
 					// In case of networked mode, we don't know the actually
 					// class of the object
 					// referred to by currentServer
-					((UCServerImpl) mUBServer).close();
+					((UBImpl) mUBServer).close();
 				}
 				System.exit(0);
 			}
@@ -139,16 +139,16 @@ public class UrlyBirdClientController implements ActionListener {
 			}
 			
 			if (pLocalflag) {
-				UBServer newServer = new UCServerImpl(props.getProperty("dbfile"));
+				UB newServer = new UBImpl(props.getProperty("dbfile"));
 				// close the existing server if any
 				if (this.mUBServer != null) {
-					((UCServerImpl) this.mUBServer).close();
+					((UBImpl) this.mUBServer).close();
 				}
 				this.mUBServer = newServer;
 			} else {
 				String host = props.getProperty("serverhost");
 				String port = props.getProperty("serverport");
-				UBServer newServer = null;
+				UB newServer = null;
 				String name = "rmi://" + host + ":" + port + "/RemoteUBServer";
 				logger.info("ClientController - RMI version - connecting to " + name);
 				Remote remoteObj = Naming.lookup(name);
@@ -160,13 +160,13 @@ public class UrlyBirdClientController implements ActionListener {
 				// the remoteObj actually refers to UCServer interface.
 				// So you need to use the following line -
 				
-				newServer = (UBServer) remoteObj;
+				newServer = (UB) remoteObj;
 				
 				// close the currentServer only if it is a local one, in which
 				// case
 				// we know that it is an object of class UCServerImpl.
 				if (this.mUBServer != null && this.localflag) {
-					((UCServerImpl) this.mUBServer).close();
+					((UBImpl) this.mUBServer).close();
 				}
 				// JOptionPane.showMessageDialog(mClientFrame,
 				// "Connected to RMI Server at " + name, "UC Client",
@@ -361,7 +361,7 @@ public class UrlyBirdClientController implements ActionListener {
 				// properly
 				// before
 				// exiting
-				((UCServerImpl) mUBServer).close();
+				((UBImpl) mUBServer).close();
 			}
 			// Note that there is nothing to do if it is connected to a remote
 			// client except exiting.

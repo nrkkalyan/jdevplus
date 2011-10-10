@@ -2,7 +2,7 @@ package com.unitedcaterers;
 
 import com.unitedcaterers.client.UrlyBirdClientController;
 import com.unitedcaterers.client.UrlyBirdClientFrame;
-import com.unitedcaterers.server.UrlyBirdRMIServer;
+import com.unitedcaterers.server.UBRmiServer;
 
 /**
  * This class is the entry point to the application. It determines what - the
@@ -20,7 +20,7 @@ public class ApplicationMain {
 		} else if ("alone".equalsIgnoreCase(args[0])) {
 			startup("none");
 		} else if ("server".equalsIgnoreCase(args[0])) {
-			UrlyBirdRMIServer.startup();
+			UBRmiServer.startup();
 		} else {
 			System.out.println("Invalid argument to main. Supported options are: server, alone, or no arguments.");
 		}
