@@ -15,7 +15,7 @@ import com.unitedcaterers.util.UBException;
  * @author Enthuware
  * @version 1.0
  */
-public class UBRmiServer {
+public class UrlyBirdRmiServer {
 	private static PropertiesDialog	pd	= new PropertiesDialog(null, true);
 	
 	public static void startup() throws UBException {

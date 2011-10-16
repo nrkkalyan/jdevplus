@@ -26,27 +26,10 @@ public class UBRmiImpl extends UnicastRemoteObject implements UB {
 		ucs = new UBImpl(dbfilename);
 	}
 	
-	// @Override
-	// public String[][] searchCaterersByHotelName(String hotelName) throws
-	// RemoteException, UCException {
-	// return ucs.searchCaterersByHotelName(hotelName);
-	// }
-	
-	// @Override
-	// public String[][] searchCaterersByLocation(String location) throws
-	// RemoteException, UCException {
-	// return ucs.searchCaterersByLocation(location);
-	// }
-	
 	@Override
 	public String[][] searchCaterersByHotelNameAndLocation(String hotelName, String location) throws RemoteException, UBException {
 		return ucs.searchCaterersByHotelNameAndLocation(hotelName, location);
 	}
-	
-	// @Override
-	// public String[][] getAllCaterers() throws RemoteException, UCException {
-	// return ucs.getAllCaterers();
-	// }
 	
 	@Override
 	public boolean bookRoom(String customerid, String[] originalData) throws RemoteException, UBException {
